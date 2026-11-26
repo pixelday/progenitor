@@ -75,7 +75,9 @@ auto-merge off, no GitHub Pages, no deploy keys, no Actions secrets.
 
 **OPEN:** whether Cloudflare's build status still appears on pull requests with Actions
 disabled. Check on the first pull request in step 3. If it does not, turn Actions back on and
-keep the repo free of workflow files.
+keep the repo free of workflow files. On 2026-11-26 the build check did appear on the
+starter's pull request (DEPLOYED), but nobody had confirmed that Actions was disabled there,
+so this stays open.
 
 Read the settings back. This works for a collaborator with Write access (LIVE):
 
@@ -133,13 +135,23 @@ no push built anything. No error appeared where a push would show one. The only 
 - the Worker's Settings, Builds page carried a banner: "This project is disconnected from
   your Git account. This may cause deployments to fail."
 
-The owner then added the repository to the app's list. **OPEN:** that this alone restores
-builds. The next push shows it.
+The owner then added the repository to the app's list. The banner went away, and the next
+push built: its build check appeared 16 seconds after the push (DEPLOYED).
+
+To see whether Cloudflare built a commit:
+
+```bash
+gh api repos/OWNER/REPO/commits/<sha>/check-runs --jq '.check_runs[] | {name, status, conclusion}'
+# built:       {"conclusion":"success","name":"Workers Builds: <worker-name>","status":"completed"}
+# never seen:  prints nothing
+```
 
 ## 6. The working loop, once step 3 is done
 
 1. Branch from `main`, commit, and the owner pushes the branch.
-2. The owner opens a pull request. Cloudflare builds a preview and comments with its URL (DOCS).
+2. The owner opens a pull request. Cloudflare builds a preview and shows its build check on
+   the pull request (DEPLOYED). Whether it also comments with the preview's URL is open
+   (step 3, part 6).
 3. Review the preview. Before merging, check the branch already contains `main`, so the merge
    ships exactly what the preview showed (LOCAL):
 

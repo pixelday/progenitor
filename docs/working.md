@@ -20,7 +20,8 @@ fifteen lines there.
 
 The starter is on `main` of its public GitHub repository, behind a ruleset that requires a
 pull request and blocks force pushes (`docs/setup/2-github.md`, part 4). It is deployed as a
-Worker on a `workers.dev` hostname, unlaunched and `noindex` (`docs/setup/3-cloudflare.md`).
+Worker on a `workers.dev` hostname, unlaunched and `noindex`, and a merge to `main` builds
+and deploys it. The live check passes: 36 `PASS` lines (`docs/setup/3-cloudflare.md`).
 No second site has been built from the starter.
 
 ## Get it online
@@ -33,19 +34,16 @@ The owner does these. A session can verify each one.
    2026-11-26: squash merging, rebase merging and wikis are on, and the step turns all three
    off. The Actions and Dependabot settings can't be read without Admin: confirm both on the
    settings page.
-3. **Finish step 3** (`docs/setup/3-cloudflare.md`). The first deploy passed 34 of the 36
-   live checks. What is left:
-   - auto-deploy. No push has built anything yet, because the GitHub App could not see the
-     repository (`docs/setup/2-github.md`, part 5). The owner added it to the app's list on
-     2026-11-26. Confirm that a push now builds
-   - the commit marker. The deployed page says `main`, not the commit, so two live checks
-     fail. That build was started from the dashboard. See whether a build started by a push
-     carries the full SHA
-   - the build log's Node line. The build succeeded; the line was not recorded
-   - part 6, the pull-request loop: push a branch, check its preview, merge, check production
-   - whether Cloudflare's build status shows on pull requests. The first two pull requests
-     show nothing from Cloudflare, and settle nothing: the app could not see the repository
-     then
+3. **Check a branch preview** (`docs/setup/3-cloudflare.md`, part 6). It is the one part of
+   step 3 not yet seen. `preview_urls` in `wrangler.jsonc` is now `true`. Push a branch, then:
+   - find where Cloudflare gives the preview's address
+   - run `scripts/verify-live.sh` against it in `preview` mode. That also shows whether the
+     `workers.dev` rule in `public/_headers` sends `noindex` on a preview hostname
+   - see whether Cloudflare comments on the pull request once a preview has an address
+
+   Still open beside it:
+   - whether Cloudflare's build status shows on pull requests with Actions disabled. It
+     showed on 2026-11-26, with the Actions setting unconfirmed
    - whether the empty `previews` block in `wrangler.jsonc` is needed, or merely allowed
 
    Then correct the step, and update "What has been proven" in `README.md`.

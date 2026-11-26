@@ -67,11 +67,11 @@ Each claim in `docs/setup/` carries one of these tags.
 - **Step 2 has been run only in part.** On 2026-11-26 the starter's own repository was on
   GitHub, public, with `main` pushed and a ruleset on `main`. The step's other settings are
   LIVE or DOCS.
-- **Step 3 has been run once and is not finished.** On 2026-11-26 the Worker was created and
-  its first build deployed to a `workers.dev` hostname. `scripts/verify-live.sh` printed 34
-  `PASS` lines and 2 `FAIL`: the page's commit marker read `main`, not the commit.
-  `npm run audit` printed thirteen `PASS` lines against the deployed host. No push has built
-  anything yet (`docs/setup/2-github.md`, part 5), so the pull-request loop has not been run.
+- **Step 3 has been run, and its live check passes.** On 2026-11-26 the Worker was created,
+  a merge to `main` built and deployed it, and `scripts/verify-live.sh` printed 36 `PASS`
+  lines against the `workers.dev` hostname. `npm run audit` printed thirteen `PASS` lines
+  against the same host. One part is not proven: no branch preview has been reached at an
+  address (`docs/setup/3-cloudflare.md`, part 6).
 - **Step 4 has never been run with this starter.** Its settings are LIVE or DOCS.
 - **No second site has been built from it yet.** Until one has, "copy it and change only the
   data and the settings" is a design goal, not a result.
