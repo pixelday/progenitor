@@ -35,14 +35,17 @@ The owner does these. A session can verify each one.
    settings page.
 3. **Finish step 3** (`docs/setup/3-cloudflare.md`). The first deploy passed 34 of the 36
    live checks. What is left:
+   - auto-deploy. No push has built anything yet, because the GitHub App could not see the
+     repository (`docs/setup/2-github.md`, part 5). The owner added it to the app's list on
+     2026-11-26. Confirm that a push now builds
    - the commit marker. The deployed page says `main`, not the commit, so two live checks
      fail. That build was started from the dashboard. See whether a build started by a push
      carries the full SHA
    - the build log's Node line. The build succeeded; the line was not recorded
    - part 6, the pull-request loop: push a branch, check its preview, merge, check production
-   - whether Cloudflare's build status shows on pull requests. The first pull request has no
-     comment and no check run from Cloudflare, but it was merged sixteen seconds after it was
-     opened, so it settles nothing
+   - whether Cloudflare's build status shows on pull requests. The first two pull requests
+     show nothing from Cloudflare, and settle nothing: the app could not see the repository
+     then
    - whether the empty `previews` block in `wrangler.jsonc` is needed, or merely allowed
 
    Then correct the step, and update "What has been proven" in `README.md`.

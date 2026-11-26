@@ -72,8 +72,15 @@ fields, with the values the starter was deployed with on 2026-11-26 (DEPLOYED):
 
 Then press Deploy. Cloudflare creates the Worker, then builds and deploys the default branch.
 
-The screen has no field for the production branch. After creation, the build settings are
-under the Worker's Settings, Build (DOCS).
+The screen has no field for the production branch. After creation it is on the Worker's
+Settings, Builds page, set to `main`, beside the same build settings (DEPLOYED). That page
+also has a "Disable builds" switch, build watch paths (`*` to begin with), deploy hooks and
+a build cache.
+
+**Open that page once the first build is done.** If it carries the banner "This project is
+disconnected from your Git account", the GitHub App cannot see the repo, and no push will
+build (step 2, part 5). A first build that deployed does not show the repo is connected: on
+2026-11-26 the first build succeeded while the banner was up (DEPLOYED).
 
 ## 4. Read the first build log
 
@@ -153,6 +160,8 @@ Until this has run once, "auto-deploy is set up" is an assumption.
   Code, config and assets roll back together.
 - **A failed build sends no alert** and leaves the previous version serving. The merged
   commit's status check is the alert, which is why the loop ends with `verify-live.sh`.
+- **A push that starts no build sends no alert either.** The previous version keeps serving
+  and the commit has no status check at all (DEPLOYED: part 3).
 - **Previews are public** to anyone with the URL. They send `noindex`, but they are not
   private. Do not put uncleared content on a branch.
 - **Free plan limits:** 3,000 build minutes a month, one build at a time, 20 minutes per

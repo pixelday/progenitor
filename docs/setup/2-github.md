@@ -124,6 +124,18 @@ Applications, Installed GitHub Apps, Cloudflare Workers and Pages, Configure.
 
 If a repo is missing from Cloudflare's picker, this scope is the usual cause (LIVE).
 
+**Where the app is already installed with a list of repositories, add this repo to the list
+before creating the Worker.** On 2026-11-26 the starter's repository was not on the list when
+its Worker was created (DEPLOYED). Nothing refused. The first build deployed, and after that
+no push built anything. No error appeared where a push would show one. The only signs were:
+
+- the pushed commits had no build check on GitHub, and the pull requests no comment
+- the Worker's Settings, Builds page carried a banner: "This project is disconnected from
+  your Git account. This may cause deployments to fail."
+
+The owner then added the repository to the app's list. **OPEN:** that this alone restores
+builds. The next push shows it.
+
 ## 6. The working loop, once step 3 is done
 
 1. Branch from `main`, commit, and the owner pushes the branch.
