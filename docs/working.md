@@ -68,6 +68,15 @@ The owner does these. A session can verify each one.
   recommends plain HTML and a small script for a control this simple.
 - **The archive's future.** If `docs/archive/` goes, eight lines point into it. Find them with
   `git grep -n 'docs/archive' -- . ':!docs/archive'`.
+- **Whether the accessibility page is mandatory.** Today it is: the build fails without
+  `/accessibility/`, a launched build refuses its starter text, and `scripts/verify-live.sh`
+  expects it to answer 200. Decide whether every site must publish one. This is for later:
+  nothing waits on it. If the answer is no, the requirement comes out of
+  `scripts/verify-dist.mjs`, `scripts/verify-live.sh`, `src/lib/pages.ts` and its test, and
+  the README and setup steps that name three legal pages.
+- **How a site takes later changes from the starter.** A site begins as a copy, and nothing
+  carries a later fix in the starter down to it. Decide whether that stays a port by hand.
+  The second site (below) is where it will first cost something.
 
 ## Build next
 
