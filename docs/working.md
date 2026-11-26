@@ -15,24 +15,26 @@ From a fresh clone, on Node 24.22.3, all of this ran on 2026-11-26:
 - `npm run preview`, then `npm run audit`: thirteen `PASS` lines.
 - `npx wrangler deploy --dry-run` accepts `wrangler.jsonc`. It uploads nothing.
 
-Nothing has been deployed, and no second site has been built from the starter.
+The starter is on `main` of its public GitHub repository, behind a ruleset that requires a
+pull request and blocks force pushes (`docs/setup/2-github.md`, part 4). Nothing has been
+deployed, and no second site has been built from the starter.
 
 ## Get it online
 
 The owner does these. A session can verify each one.
 
-1. **Read `docs/archive/` before the first push.** The repository is public, so the archive is
-   published with it. Decide whether all four files stay.
-2. **Merge the import.** Push the branch `claude-import-starter`, open a pull request and merge
-   it with a merge commit.
-3. **Add a ruleset for `main`:** require a pull request, block force pushes
-   (`docs/setup/2-github.md`, part 4).
-4. **Install Node 24.22.3 on the development machine.** It had 21.1.0, which the starter
+1. **Read `docs/archive/`.** The repository is public, so the archive was published with the
+   first push. Decide whether all four files stay.
+2. **Finish the repository settings** (`docs/setup/2-github.md`, part 3). Read back on
+   2026-11-26: squash merging, rebase merging and wikis are on, and the step turns all three
+   off. The Actions and Dependabot settings can't be read without Admin: confirm both on the
+   settings page.
+3. **Install Node 24.22.3 on the development machine.** It had 21.1.0, which the starter
    refuses. The runs above used a temporary copy of 24.22.3.
-5. **Confirm the Worker's name before creating the Worker.** `wrangler.jsonc` says
+4. **Confirm the Worker's name before creating the Worker.** `wrangler.jsonc` says
    `progenitor`. The name appears in the public `workers.dev` hostname and must equal the name
    in the dashboard, so treat it as permanent. `package.json` carries the same name.
-6. **Do step 3** (`docs/setup/3-cloudflare.md`). The first deploy settles what is still marked
+5. **Do step 3** (`docs/setup/3-cloudflare.md`). The first deploy settles what is still marked
    OPEN:
    - the build image supplies Node 24.22.3
    - `_headers` applies on Workers, including to the 404 response
@@ -44,7 +46,7 @@ The owner does these. A session can verify each one.
    - the empty `previews` block in `wrangler.jsonc` is needed, or merely allowed
 
    Then correct the step, and update "What has been proven" in `README.md`.
-7. **Set a commit identity in every clone.** This clone commits as a GitHub noreply address
+6. **Set a commit identity in every clone.** This clone commits as a GitHub noreply address
    (`docs/setup/2-github.md`, part 2). A clone on another machine needs the same before its
    first commit: a global git identity is usually a personal or work address, and this
    repository is public.

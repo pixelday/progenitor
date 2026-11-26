@@ -63,7 +63,10 @@ Each claim in `docs/setup/` carries one of these tags.
 
 - **Step 1 is LOCAL throughout.** Install from the lockfile, the full build, the header-faithful
   preview and the island hydrating under the Content Security Policy in Chrome 158 all ran.
-- **Steps 2 to 4 have never been run with this starter.** Nothing here has been deployed to
+- **Step 2 has been run only in part.** On 2026-11-26 the starter's own repository was on
+  GitHub, public, with `main` pushed and a ruleset on `main`. The step's other settings are
+  LIVE or DOCS.
+- **Steps 3 and 4 have never been run with this starter.** Nothing here has been deployed to
   Cloudflare. Their settings are LIVE or DOCS, and the first deploy settles the OPEN items.
   When it does, update the step.
 - **No second site has been built from it yet.** Until one has, "copy it and change only the
