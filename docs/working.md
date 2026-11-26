@@ -15,9 +15,13 @@ From a fresh clone, on Node 24.22.3, all of this ran on 2026-11-26:
 - `npm run preview`, then `npm run audit`: thirteen `PASS` lines.
 - `npx wrangler deploy --dry-run` accepts `wrangler.jsonc`. It uploads nothing.
 
+The development machine now has Node 24.22.3: `npm ci` and `npm run build` printed the same
+fifteen lines there.
+
 The starter is on `main` of its public GitHub repository, behind a ruleset that requires a
-pull request and blocks force pushes (`docs/setup/2-github.md`, part 4). Nothing has been
-deployed, and no second site has been built from the starter.
+pull request and blocks force pushes (`docs/setup/2-github.md`, part 4). It is deployed as a
+Worker on a `workers.dev` hostname, unlaunched and `noindex` (`docs/setup/3-cloudflare.md`).
+No second site has been built from the starter.
 
 ## Get it online
 
@@ -29,24 +33,20 @@ The owner does these. A session can verify each one.
    2026-11-26: squash merging, rebase merging and wikis are on, and the step turns all three
    off. The Actions and Dependabot settings can't be read without Admin: confirm both on the
    settings page.
-3. **Install Node 24.22.3 on the development machine.** It had 21.1.0, which the starter
-   refuses. The runs above used a temporary copy of 24.22.3.
-4. **Confirm the Worker's name before creating the Worker.** `wrangler.jsonc` says
-   `progenitor`. The name appears in the public `workers.dev` hostname and must equal the name
-   in the dashboard, so treat it as permanent. `package.json` carries the same name.
-5. **Do step 3** (`docs/setup/3-cloudflare.md`). The first deploy settles what is still marked
-   OPEN:
-   - the build image supplies Node 24.22.3
-   - `_headers` applies on Workers, including to the 404 response
-   - the `workers.dev` rule in `public/_headers` sends `X-Robots-Tag: noindex` on the
-     production hostname
-   - `WORKERS_CI_COMMIT_SHA` is the variable's name: if the deployed page's marker says
-     `local`, it is not
-   - Cloudflare's build status shows on pull requests while GitHub Actions is disabled
-   - the empty `previews` block in `wrangler.jsonc` is needed, or merely allowed
+3. **Finish step 3** (`docs/setup/3-cloudflare.md`). The first deploy passed 34 of the 36
+   live checks. What is left:
+   - the commit marker. The deployed page says `main`, not the commit, so two live checks
+     fail. That build was started from the dashboard. See whether a build started by a push
+     carries the full SHA
+   - the build log's Node line. The build succeeded; the line was not recorded
+   - part 6, the pull-request loop: push a branch, check its preview, merge, check production
+   - whether Cloudflare's build status shows on pull requests. The first pull request has no
+     comment and no check run from Cloudflare, but it was merged sixteen seconds after it was
+     opened, so it settles nothing
+   - whether the empty `previews` block in `wrangler.jsonc` is needed, or merely allowed
 
    Then correct the step, and update "What has been proven" in `README.md`.
-6. **Set a commit identity in every clone.** This clone commits as a GitHub noreply address
+4. **Set a commit identity in every clone.** This clone commits as a GitHub noreply address
    (`docs/setup/2-github.md`, part 2). A clone on another machine needs the same before its
    first commit: a global git identity is usually a personal or work address, and this
    repository is public.
@@ -56,7 +56,8 @@ The owner does these. A session can verify each one.
 - **A public demo of the starter.** The build refuses to launch the starter as it stands.
   With `launched: true` it fails on the URL, the name, the three legal pages, the icons, the
   share image and its alt text. That is what the check is for. If the starter itself should
-  ever be live and indexable on a domain, that needs a deliberate exception.
+  ever be live and indexable on a domain, that needs a deliberate exception. Today it is
+  deployed unlaunched, on a `workers.dev` hostname that sends `noindex`.
 - **The restored config.** `astro.config.ts`, `wrangler.jsonc` and `.gemini/settings.json` were
   rewritten from the docs on 2026-11-25. If the originals turn up, compare them.
 - **Agent files in the site's repository.** `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.codex/` and

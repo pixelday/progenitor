@@ -1,11 +1,14 @@
 # Step 3. Deploy to a `workers.dev` hostname
 
-As of 2026-11-25. **This step has not been run with this starter, and nothing here has been
-deployed to Cloudflare.** Everything is **DOCS** unless tagged. The first deploy settles the
-**OPEN** items; when it does, correct this file.
+As of 2026-11-26. **The Worker has been created and its first build deployed** to a
+`workers.dev` hostname. What that showed is tagged **DEPLOYED**. Everything else is **DOCS**
+unless tagged. The step is not finished: two live checks fail (part 5), and part 6, the
+pull-request loop, has not been run. The remaining **OPEN** items wait on it.
 
 No domain is needed. The site goes live on `https://<worker-name>.<subdomain>.workers.dev`,
-which sends `noindex`. The owner does the dashboard parts; a session verifies.
+which sends `noindex` (DEPLOYED). `<subdomain>` is the Cloudflare account's, not the
+Worker's: the create screen has no field for it, and it is public. The owner does the
+dashboard parts; a session verifies.
 
 ## 1. The account
 
@@ -18,6 +21,11 @@ which sends `noindex`. The owner does the dashboard parts; a session verifies.
 - Connecting a repo makes Cloudflare generate **one API token** for its builds. It is a user
   token, listed under the connecting user's My Profile, API Tokens. Do not delete or roll it:
   builds then fail with "The build token selected for this build has been deleted or rolled".
+- **The token is not scoped to this Worker** (DEPLOYED: the create screen lists its
+  permissions before making it). It can edit Workers scripts and the account's Workers
+  storage products, such as KV, R2, D1 and Queues. It can edit Workers Routes on every zone
+  in the account. It can read the account's settings and the user's details and memberships.
+  Give it a name on the create screen (part 3), so it can be told apart later.
 - **The owner connects the repo, signed in as themselves.** The token belongs to whoever made
   the connection and stops working when that user leaves the account.
 - **No machine needs `wrangler login`.** Deploys happen in Cloudflare's build. `wrangler dev`
@@ -45,26 +53,36 @@ In `wrangler.jsonc`, set `name` and `compatibility_date` (step 1). The file as s
 
 In the Cloudflare dashboard: Workers & Pages, Create application, import a repository.
 Choose the GitHub account and this repo, scoping the GitHub App to this repo only (step 2).
-Give the Worker the same name as `name` in `wrangler.jsonc`.
 
-Build settings, under the Worker's Settings, Build. The first two rows are the ones to set.
-The rest are the documented defaults, listed so nothing is left to guess:
+The last screen, "Set up your application", takes every setting at once. These are its
+fields, with the values the starter was deployed with on 2026-11-26 (DEPLOYED):
 
-| Setting | Set to | Why |
+| Field | Set to | Why |
 |---|---|---|
+| Project name | the same as `name` in `wrangler.jsonc` | This is the Worker's name, and the first label of its hostname. |
 | Build command | `npm run build` | It runs the type check, the tests and `verify-dist` around the build. `npx astro build` alone would deploy without any of them. |
-| Enable Preview Builds (Branch control) | On | Every push to a branch other than `main` builds a preview, and the pull request gets its URL. |
-| Deploy command | `npx wrangler deploy` (the default) | |
-| Production branch | `main` (the default) | |
-| Root directory | the repo root (the default) | |
-| Build variables and secrets | none | Node comes from `.nvmrc`. This project has no secrets. |
+| Deploy command | `npx wrangler deploy` | |
+| Preview command | `npx wrangler preview` | Builds the preview for a branch other than `main` (DOCS). |
+| Enable Preview builds | On | Every push to a branch other than `main` builds a preview, and the pull request gets its URL (DOCS). |
+| Protect with Cloudflare Access | Off | Not tried. `verify-live.sh` expects to reach the site without signing in. |
+| Path, under Advanced settings | `/` | The repo root. |
+| API token | Create new token | Cloudflare makes the build token described in part 1. |
+| API token name | a name that says what the token is for, such as `<worker-name> builds` | The field starts empty. The name is how the token is recognised later in the user's list of API tokens. |
+| Variable name, Variable value | empty | Node comes from `.nvmrc`. This project has no secrets. |
+
+Then press Deploy. Cloudflare creates the Worker, then builds and deploys the default branch.
+
+The screen has no field for the production branch. After creation, the build settings are
+under the Worker's Settings, Build (DOCS).
 
 ## 4. Read the first build log
 
 A green check is not enough. In the log, confirm:
 
 1. **Node is 24.22.3.** Workers Builds reads `.nvmrc`, and its image defaulted to Node 24.22.1
-   on 2026-11-25. **OPEN:** that the image can supply 24.22.3.
+   on 2026-11-25. The first build, on 2026-11-26, succeeded with no build variable set
+   (DEPLOYED). Its Node line was not copied here, so that the image supplied 24.22.3 is still
+   **OPEN** until someone reads the line.
    - If the install step fails with `EBADENGINE`, the pin was not honored. Set a build variable
      `NODE_VERSION=24.22.3` and rebuild.
    - If the image cannot provide 24.22.3 at all, change `.nvmrc` and `engines.node` in
@@ -94,16 +112,28 @@ Every line must say `PASS`. In `preview` mode it checks:
   accessibility and sitemap pages answer 200
 - the host sends `X-Robots-Tag: noindex`
 
-The script is copied from `docs/archive/technical-brief.md`, where it was run against public hosts. It
-has not been run against a deploy of this starter. What it will settle:
+The script is copied from `docs/archive/technical-brief.md`, where it was run against public
+hosts. Run against the first deploy on 2026-11-26, it printed 34 `PASS` lines and 2 `FAIL`
+(DEPLOYED):
 
-| OPEN until this runs | If it fails |
+| Was open | What the deploy showed |
 |---|---|
-| `_headers` applies on Workers, including to the 404 response (true in `wrangler dev`, LOCAL) | Check that `dist/_headers` exists in the build log's upload list. |
-| The marker equals the full commit SHA. Workers Builds sets `WORKERS_CI_COMMIT_SHA` at build time (DOCS). | If the page shows `local`, the variable has another name: fix `src/layouts/Base.astro`. If it shows a short SHA, pass the short form. |
-| The `workers.dev` rule in `public/_headers` matches the production hostname, so it sends `noindex`. Cloudflare's example is written for preview hostnames; the production one has the same two-label shape. | Add a second rule for the exact hostname. Never put `X-Robots-Tag` under `/*`: that de-indexes the real domain later. |
+| `_headers` applies on Workers, including to the 404 response | It does. The six headers arrived on the page and on the 404. If they ever do not, check that `dist/_headers` is in the build log's upload list. |
+| The `workers.dev` rule in `public/_headers` matches the production hostname | It does: the host sent `X-Robots-Tag: noindex`. Never put `X-Robots-Tag` under `/*`: that de-indexes the real domain later. |
+| The marker equals the full commit SHA | **It did not.** The page carried `content="main"`. So `WORKERS_CI_COMMIT_SHA` is the variable's name, and on this build it held the branch name. Both `FAIL` lines are this one fact: the marker line, and the 404 line, which looks for the same SHA. |
 
-Then open the site in a browser with the console open and repeat step 1's island check.
+**OPEN:** whether a build started by a push carries the full SHA. The first build was started
+from the create screen, not by a push. The first pushed branch settles it (part 6). If its
+marker is a branch name too, fix the marker's source in `src/layouts/Base.astro` before
+trusting the two lines.
+
+The status codes and cache headers of step 1, part 4 were the same on the deployed host
+(DEPLOYED): `/terms` answered 307 to `/terms/`, `/sitemap.xml` and `/_headers` answered 404, a
+file under `/_astro/` was `immutable`, and HTML was `max-age=0, must-revalidate`.
+
+Then check the island on the deployed host. `npm run audit -- https://<host>` does it in
+Chrome. Against the first deploy it printed thirteen `PASS` lines, among them "no console
+message, so no Content Security Policy violation" (DEPLOYED).
 
 ## 6. Prove the whole loop once
 

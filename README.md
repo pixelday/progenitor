@@ -58,6 +58,7 @@ Each claim in `docs/setup/` carries one of these tags.
 |---|---|
 | **LOCAL** | Run against this starter on 2026-11-25: macOS, Node 24.22.3, the versions in `package.json`. |
 | **LIVE** | Observed on live Cloudflare sites in earlier work, on a different build stack (Jekyll on Cloudflare Pages). |
+| **DEPLOYED** | Observed on the starter's own Worker at its `workers.dev` hostname, from 2026-11-26. |
 | **DOCS** | Read in vendor documentation in November 2026. Not run. |
 | **OPEN** | Not established. The step says how to settle it. |
 
@@ -66,9 +67,12 @@ Each claim in `docs/setup/` carries one of these tags.
 - **Step 2 has been run only in part.** On 2026-11-26 the starter's own repository was on
   GitHub, public, with `main` pushed and a ruleset on `main`. The step's other settings are
   LIVE or DOCS.
-- **Steps 3 and 4 have never been run with this starter.** Nothing here has been deployed to
-  Cloudflare. Their settings are LIVE or DOCS, and the first deploy settles the OPEN items.
-  When it does, update the step.
+- **Step 3 has been run once and is not finished.** On 2026-11-26 the Worker was created and
+  its first build deployed to a `workers.dev` hostname. `scripts/verify-live.sh` printed 34
+  `PASS` lines and 2 `FAIL`: the page's commit marker read `main`, not the commit.
+  `npm run audit` printed thirteen `PASS` lines against the deployed host. The pull-request
+  loop has not been run.
+- **Step 4 has never been run with this starter.** Its settings are LIVE or DOCS.
 - **No second site has been built from it yet.** Until one has, "copy it and change only the
   data and the settings" is a design goal, not a result.
 - **`astro.config.ts`, `wrangler.jsonc` and `.gemini/settings.json` were rewritten on
