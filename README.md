@@ -70,8 +70,8 @@ Each claim in `docs/setup/` carries one of these tags.
 - **Step 3 has been run once and is not finished.** On 2026-11-26 the Worker was created and
   its first build deployed to a `workers.dev` hostname. `scripts/verify-live.sh` printed 34
   `PASS` lines and 2 `FAIL`: the page's commit marker read `main`, not the commit.
-  `npm run audit` printed thirteen `PASS` lines against the deployed host. The pull-request
-  loop has not been run.
+  `npm run audit` printed thirteen `PASS` lines against the deployed host. No push has built
+  anything yet (`docs/setup/2-github.md`, part 5), so the pull-request loop has not been run.
 - **Step 4 has never been run with this starter.** Its settings are LIVE or DOCS.
 - **No second site has been built from it yet.** Until one has, "copy it and change only the
   data and the settings" is a design goal, not a result.
