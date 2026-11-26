@@ -224,6 +224,9 @@ request whose preview did have an address got no comment.
   and the commit has no status check at all (DEPLOYED: part 3).
 - **Previews are public** to anyone with the URL. They send `noindex`, but they are not
   private. Do not put uncleared content on a branch.
+- **A preview goes away with its branch** (DEPLOYED). Within a minute of the pull request's
+  merge, which deleted the branch, its preview hostname answered Cloudflare's plain "Page not
+  found". Check a preview before merging, not after.
 - **Free plan limits:** 3,000 build minutes a month, one build at a time, 20 minutes per
   build; 20,000 files per version, 25 MiB per file.
 - **Some default client user agents are refused on `workers.dev`** (error 1010, seen with
