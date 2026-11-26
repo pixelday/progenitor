@@ -38,8 +38,8 @@ npm ci
 npm run build
 ```
 
-The script is `astro check && vitest run && astro build && html-validate dist && node
-scripts/verify-dist.mjs`. Expect, in order:
+The script is `astro check && vitest run --dir src && astro build && html-validate dist &&
+node scripts/verify-dist.mjs`. Expect, in order:
 
 ```
 - 0 errors                                  (astro check)

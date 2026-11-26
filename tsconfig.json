@@ -1,7 +1,8 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"],
+  // Only the project's own files. A broader pattern would also type-check any other folder
+  // that happens to sit here, such as a local scratch folder or a copied example project.
+  "include": [".astro/types.d.ts", "src", "*.ts"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "react",

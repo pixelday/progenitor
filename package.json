@@ -10,8 +10,8 @@
     "prepare": "panda codegen",
     "dev": "astro dev",
     "check": "astro check",
-    "test": "vitest run",
-    "build": "astro check && vitest run && astro build && html-validate dist && node scripts/verify-dist.mjs",
+    "test": "vitest run --dir src",
+    "build": "astro check && vitest run --dir src && astro build && html-validate dist && node scripts/verify-dist.mjs",
     "preview": "wrangler dev",
     "audit": "node scripts/audit.mjs"
   },

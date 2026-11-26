@@ -22,6 +22,11 @@ installed package or the current docs before trusting a remembered API.
 - **`markdown.syntaxHighlight: false`.** With the CSP on, Astro warns on every build that its
   default highlighter writes inline styles. The starter has no Markdown. Use Prism if that
   changes. (LOCAL)
+- **The type check and the tests cover `src/` and the root config files, nothing else.**
+  `tsconfig.json` includes `src` and `*.ts`, and the test script is `vitest run --dir src`.
+  With Astro's default `**/*`, and Vitest's default of the whole folder, any other folder
+  sitting in the repo is checked too, ignored by git or not: a local scratch folder with a
+  copied example project failed the build that way. (LOCAL)
 - **Content collections:** the config is `src/content.config.ts`, loaders come from
   `astro/loaders`, `z` comes from `astro/zod`, and every collection needs a loader. (LOCAL)
 - **`astro:content` cannot be imported in client code.** `import type` is fine, which is how
