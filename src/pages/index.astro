@@ -4,6 +4,7 @@ import { css } from 'styled-system/css';
 import Base from '../layouts/Base.astro';
 import RecordBrowser from '../components/RecordBrowser';
 import { toSummary } from '../lib/records';
+import { site } from '../site';
 
 // Build time only: read the YAML-backed collection, sort it, and slim it for the island.
 const records = (await getCollection('records'))
@@ -11,13 +12,24 @@ const records = (await getCollection('records'))
   .map(toSummary);
 
 const categories = [...new Set(records.map((record) => record.category))].sort();
+
+// Structured data: only what is true of every site. Add a publisher in src/site.ts.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: site.name,
+  description: site.description,
+  url: `${site.url}/`,
+  inLanguage: site.lang,
+  ...(site.publisher && { publisher: { '@type': site.publisher.type, name: site.publisher.name } }),
+};
 ---
 
-<Base>
+<Base jsonLd={jsonLd}>
   <h1 class={css({ fontSize: '3xl', fontWeight: 'bold' })}>Records</h1>
-  <!--
-    client:load: the whole list is prerendered as HTML, then hydrated for filtering.
-    Without JavaScript every record is still listed and every link still works.
-  -->
+  {
+    /* client:load: the whole list is prerendered as HTML, then hydrated for filtering.
+       Without JavaScript every record is still listed and every link still works. */
+  }
   <RecordBrowser client:load records={records} categories={categories} />
 </Base>

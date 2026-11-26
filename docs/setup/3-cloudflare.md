@@ -71,7 +71,7 @@ A green check is not enough. In the log, confirm:
      `package.json` to the newest 24.x it offers, in one commit. Keep the two equal.
 2. **The install used the lockfile**, and `panda codegen` ran after it (the `prepare` script).
    Without it, `astro check` fails on every `styled-system/...` import.
-3. **`npm run build` printed eleven `PASS` lines** and `all passed`.
+3. **`npm run build` printed fifteen `PASS` lines** and `all passed`.
 4. **The deploy step uploaded the assets.**
 
 Record the Node line and anything unexpected in `docs/project.md`.
@@ -90,6 +90,8 @@ Every line must say `PASS`. In `preview` mode it checks:
 - both halves of the CSP arrive: the header and the `<meta>`
 - no `Set-Cookie`, and nothing injected at the edge
 - `robots.txt` answers 200 and does not block everything
+- the icons and the manifest answer 200 with the right type, and the privacy policy, terms,
+  accessibility and sitemap pages answer 200
 - the host sends `X-Robots-Tag: noindex`
 
 The script is copied from `docs/archive/technical-brief.md`, where it was run against public hosts. It

@@ -1,8 +1,9 @@
-# Static site starter
+# Progenitor
 
-A website that builds to plain HTML, CSS and JS and is served from Cloudflare's edge. There is
-no server, no database and no runtime data fetching. Records live in a YAML file and are
-rendered at build time. A merge to `main` on GitHub is the only way anything deploys.
+A static site starter: a generic, working site to copy and make your own. It builds to plain
+HTML, CSS and JS and is served from Cloudflare's edge. There is no server, no database and no
+runtime data fetching. Records live in a YAML file and are rendered at build time. A merge to
+`main` on GitHub is the only way anything deploys.
 
 Stack: Astro (static output only), React + TypeScript for interactive islands, PandaCSS,
 Base UI, Cloudflare Workers static assets (free plan), one private GitHub repo (free plan).
@@ -65,6 +66,12 @@ Each claim in `docs/setup/` carries one of these tags.
 - **Steps 2 to 4 have never been run with this starter.** Nothing here has been deployed to
   Cloudflare. Their settings are LIVE or DOCS, and the first deploy settles the OPEN items.
   When it does, update the step.
+- **No second site has been built from it yet.** Until one has, "copy it and change only the
+  data and the settings" is a design goal, not a result.
+- **`astro.config.ts`, `wrangler.jsonc` and `.gemini/settings.json` were rewritten on
+  2026-11-25** from this README and `docs/`, after the originals were lost in a copy. With
+  them the build reproduced the figures recorded before the loss: the same pages, the same
+  checks passing and 83.4 KB of JavaScript.
 
 ## Commands
 
@@ -72,8 +79,9 @@ Each claim in `docs/setup/` carries one of these tags.
 |---|---|
 | `npm ci` | Installs from the lockfile, then generates `styled-system/` (Panda's helpers). |
 | `npm run dev` | Dev server with hot reload. It sends no security headers and no CSP. |
-| `npm run build` | Type check, unit tests, build, then `scripts/verify-dist.mjs`. This is what Cloudflare runs, so a failing check blocks the deploy. |
+| `npm run build` | Type check, unit tests, build, `html-validate` over `dist/`, then `scripts/verify-dist.mjs`. This is what Cloudflare runs, so a failing check blocks the deploy. |
 | `npm run preview` | Serves `dist/` the way Cloudflare will, with the headers and the real 404. Build first. |
+| `npm run audit` | Browser checks against the preview: axe on every page, then the island's behavior. Needs Chrome, so it is not part of the build. Run it before a pull request. |
 | `npm test` | Unit tests only. |
 
 There is no `deploy` script on purpose. Deploys come only from Cloudflare building a merge to
@@ -88,25 +96,58 @@ docs/project.md         what this site is, and its current status: fill it in
 docs/setup/             the four steps
 docs/stack-wiring.md    how Astro, React, Panda and Base UI are wired together
 docs/archive/           background from before the starter had code: not instructions
-src/site.ts             name, description, canonical URL and the launch switch
+src/site.ts             the site's identity and its two switches: launched, AI crawlers
+src/lib/pages.ts        the page registry: every fixed page's path, title and description
 src/data/records.yml    the records: the source of truth for content
 src/content.config.ts   the records' schema; bad data fails the build
-src/pages/              one file per page; records/[id].astro makes a page per record
-src/components/         React islands (the only JavaScript the site ships)
-src/lib/                the data projection and the localStorage store, with its tests
-public/_headers         security headers and cache rules, read by Cloudflare
-astro.config.ts         static output, the Content Security Policy, Panda, the sitemap
+src/pages/              one file per page; records/[id].astro makes a page per record;
+                        the .ts files write robots.txt, sitemap.xml, llms.txt and the manifest
+src/layouts/Base.astro  the one <head>: icons, share card, structured data, canonical
+src/components/         React islands (the only JavaScript the site ships), JSON-LD, prose
+src/lib/                the data projection and the localStorage store, with their tests
+public/                 _headers (security headers, cache rules), the icons, the share card
+astro.config.ts         static output, the Content Security Policy, Panda
 wrangler.jsonc          the Cloudflare Worker: static assets only, no code
+.htmlvalidate.mjs       markup rules for the built HTML
 scripts/verify-dist.mjs checks the build; runs inside `npm run build`
+scripts/audit.mjs       checks a served build in a browser; `npm run audit`
 scripts/verify-live.sh  checks a deployed host; run it after every deploy
 ```
+
+## What every site built from this ships
+
+The build fails if any of it is missing, malformed or out of step.
+
+| What | Where it comes from |
+|---|---|
+| `/`, a page per record, `/privacy-policy/`, `/terms/`, `/accessibility/`, `/sitemap/`, a real 404 | `src/pages/` |
+| `robots.txt`, `manifest.webmanifest` | `src/pages/*.ts`, from `src/site.ts` |
+| `sitemap.xml`, `llms.txt` | the same, on a launched site only |
+| `favicon.ico`, `favicon.svg`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `social.png` | `public/`. The starter's are a plain blue square and card: a site replaces all six |
+| Title, description, canonical or `noindex`, theme color, icon and manifest links | `src/layouts/Base.astro` |
+| Open Graph and Twitter card tags, JSON-LD `WebSite` | the same, on a launched site only |
+| Security headers and the Content Security Policy | `public/_headers`, `astro.config.ts` |
+
+**Two switches, in `src/site.ts`.** Each has several consumers, and `verify-dist` fails a
+build where they disagree.
+
+- `launched` decides whether pages are indexable. While it is false, nothing states an
+  absolute URL: no canonical, no share card, no structured data, no `sitemap.xml`, no
+  `llms.txt`, and no `Sitemap:` line in `robots.txt`.
+- `aiCrawlers` is `'allow'` or `'block'`. It decides what `robots.txt` tells AI crawlers and
+  whether `llms.txt` exists. The Cloudflare dashboard must be set to agree
+  (`docs/setup/4-launch.md`, part 5).
+
+**Adding a page:** create the file in `src/pages/` and add its entry to `src/lib/pages.ts`.
+The registry feeds the sitemap page, `sitemap.xml`, `llms.txt` and the footer. The build
+fails if a page is built that the sitemap page does not list.
 
 ## Rules that hold
 
 1. **Static output only.** No adapter, no Worker code, no server. If a feature seems to need
    one, stop and ask the owner.
 2. **No third-party requests.** Fonts, scripts and images are served from this site. An
-   exception is declared in `astro.config.ts` and on the privacy page in the same change.
+   exception is declared in `astro.config.ts` and on the privacy policy in the same change.
 3. **The repo is the site.** Headers, redirects, the CSP and the Worker config are files.
    What can only be set in a dashboard is listed in `docs/setup/`.
 4. **Content lives in data.** Facts go in `src/data/`, each with an as-of date and, where it

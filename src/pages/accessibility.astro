@@ -1,0 +1,48 @@
+---
+import Prose from '../components/Prose.astro';
+import Base from '../layouts/Base.astro';
+import { pages } from '../lib/pages';
+import { site } from '../site';
+
+const page = pages.accessibility;
+---
+
+<Base title={page.title} description={page.description}>
+  <Prose>
+    <h1>{page.title}</h1>
+    <p>Last updated <time datetime={site.legalUpdated}>{site.legalUpdated}</time>.</p>
+    {/* verify-dist.mjs refuses to build a launched site while this attribute is present. */}
+    <p data-starter-placeholder>
+      Starter text. Replace it with what was actually tested on this site before launch.
+    </p>
+
+    <h2 id="standard">The standard</h2>
+    <p>
+      This site aims to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at Level AA. Every
+      page works with a keyboard alone, with a screen reader, at 200% zoom and with JavaScript
+      turned off.
+    </p>
+
+    <h2 id="how-it-is-checked">How it is checked</h2>
+    <p>
+      Each release is checked with automated tools before it is published. Automated tools find
+      only some barriers, so state here which manual and assistive-technology checks were done,
+      and when.
+    </p>
+
+    <h2 id="known-limitations">Known limitations</h2>
+    <p>List any part of the site that does not meet the standard yet, or say that none is known.</p>
+
+    <h2 id="report-a-barrier">Report a barrier</h2>
+    {
+      site.contact ? (
+        <p>
+          If something on this site does not work for you, write to
+          <a href={`mailto:${site.contact}`}>{site.contact}</a> and say which page it was on.
+        </p>
+      ) : (
+        <p>Say how a visitor can report a barrier, and how soon to expect an answer.</p>
+      )
+    }
+  </Prose>
+</Base>

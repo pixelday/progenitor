@@ -1,11 +1,16 @@
 ---
-import { css } from 'styled-system/css';
+import Prose from '../components/Prose.astro';
 import Base from '../layouts/Base.astro';
+import { pages } from '../lib/pages';
 ---
 
 <Base title="Page not found" noindex>
-  <h1 class={css({ fontSize: '3xl', fontWeight: 'bold' })}>Page not found</h1>
-  <p>
-    <a href="/" class={css({ textDecoration: 'underline' })}>Go to the home page</a>
-  </p>
+  <Prose>
+    <h1>Page not found</h1>
+    <p>The page may have moved, or the address may be mistyped.</p>
+    <ul>
+      <li><a href={pages.home.path}>Go to the home page</a></li>
+      <li><a href={pages.sitemap.path}>See every page in the sitemap</a></li>
+    </ul>
+  </Prose>
 </Base>

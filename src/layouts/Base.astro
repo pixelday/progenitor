@@ -1,23 +1,28 @@
 ---
 import '../styles/global.css';
 import { css } from 'styled-system/css';
+import JsonLd from '../components/JsonLd.astro';
+import { absolute, legalPages, pages } from '../lib/pages';
 import { site } from '../site';
 
 interface Props {
   /** Page title. The site name is appended. Omit it on the home page. */
   title?: string;
   description?: string;
-  /** Only the 404 page sets this: it is never indexed and never gets a canonical. */
+  /** Only the 404 page sets this: it is never indexed and never states an absolute URL. */
   noindex?: boolean;
+  /** Structured data for this page. Rendered only when the page is indexable. */
+  jsonLd?: Record<string, unknown>;
 }
 
-const { title, description = site.description, noindex = false } = Astro.props;
+const { title, description = site.description, noindex = false, jsonLd } = Astro.props;
 const fullTitle = title ? `${title} · ${site.name}` : site.name;
 
-// Launch switch: exactly one of "noindex" or a canonical URL on every page.
+// The launch switch. An indexable page states its absolute URL (canonical, share card,
+// structured data). Any other page says noindex and states none.
 const indexable = site.launched && !noindex;
-// Absolute URL built from config (Astro.site), never from the request.
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
+// Absolute URL built from config, never from the request.
+const canonical = absolute(Astro.url.pathname);
 
 // The commit this build came from. Workers Builds sets the variable at build time;
 // a local build says "local". scripts/verify-live.sh reads it to prove which deploy is live.
@@ -27,24 +32,46 @@ const link = css({ textDecoration: 'underline', _hover: { textDecoration: 'none'
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={site.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {indexable ? <link rel="canonical" href={canonical} /> : <meta name="robots" content="noindex, nofollow" />}
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content={site.themeColor} />
+
+    {/* Icons. The files live in public/, and verify-dist checks their type and size.
+        sizes="32x32" on the ICO makes browsers that can use the SVG prefer it. */}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
     {
-      indexable ? (
-        <link rel="canonical" href={canonical} />
-      ) : (
-        <meta name="robots" content="noindex, nofollow" />
+      indexable && (
+        <Fragment>
+          <meta property="og:type" content="website" />
+          <meta property="og:site_name" content={site.name} />
+          <meta property="og:locale" content={site.locale} />
+          <meta property="og:title" content={title ?? site.name} />
+          <meta property="og:description" content={description} />
+          <meta property="og:url" content={canonical} />
+          <meta property="og:image" content={absolute(site.shareImage.path)} />
+          <meta property="og:image:type" content="image/png" />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content={site.shareImage.alt} />
+          <meta name="twitter:card" content="summary_large_image" />
+        </Fragment>
       )
     }
-    <meta name="format-detection" content="telephone=no" />
+    {indexable && jsonLd && <JsonLd data={jsonLd} />}
     <meta name="site-marker" content={marker} />
   </head>
   <body class={css({ color: 'gray.900', bg: 'white', lineHeight: '1.5' })}>
-    <!-- Base UI popups portal into this isolated stacking context (see panda.config.ts). -->
+    {/* Base UI popups portal into this isolated stacking context (see panda.config.ts). */}
     <div class="root">
       <a
         href="#main"
@@ -68,22 +95,21 @@ const link = css({ textDecoration: 'underline', _hover: { textDecoration: 'none'
       <main id="main" class={css({ maxW: '5xl', mx: 'auto', p: '6', display: 'grid', gap: '6' })}>
         <slot />
       </main>
-      <footer
-        class={css({
-          maxW: '5xl',
-          mx: 'auto',
-          px: '6',
-          py: '8',
-          fontSize: 'sm',
-          color: 'gray.600',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '4',
-        })}
-      >
-        <span>&copy; {new Date().getFullYear()} {site.name}</span>
-        <a href="/privacy/" class={link}>Privacy</a>
-        <a href="/terms/" class={link}>Terms</a>
+      <footer class={css({ maxW: '5xl', mx: 'auto', px: '6', py: '8', fontSize: 'sm', color: 'gray.600' })}>
+        <nav aria-label="Footer">
+          <ul class={css({ display: 'flex', flexWrap: 'wrap', columnGap: '4', rowGap: '2' })}>
+            {
+              [...legalPages, pages.sitemap].map((page) => (
+                <li>
+                  <a href={page.path} class={link}>
+                    {page.title}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+        <p class={css({ mt: '3' })}>&copy; {new Date().getFullYear()} {site.name}</p>
       </footer>
     </div>
   </body>

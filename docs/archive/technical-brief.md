@@ -20,6 +20,13 @@
 >   to settle.
 > - **Ownership is the owner's choice.** §11's dedicated accounts and handoff plan are one
 >   option, not a requirement of the starter.
+> - **The §7 floor is built, not listed.** The starter ships the icons, the manifest, the share
+>   card, structured data and the legal pages, and `verify-dist` checks each one. The pages are
+>   `/privacy-policy/`, `/terms/`, `/accessibility/` and `/sitemap/`.
+> - **The sitemap is `sitemap.xml`**, written by an endpoint, not `sitemap-index.xml` from
+>   `@astrojs/sitemap` (§4.7, §7.5). It and `llms.txt` exist only on a launched site.
+> - **The AI-crawler decision (§3) is a value in `src/site.ts`**, read by `robots.txt` and
+>   `llms.txt`.
 
 ```
 status:   ACTIVE INSTRUCTIONS until the site is handoff-ready (§13 step 7); after that, a

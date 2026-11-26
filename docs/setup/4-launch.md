@@ -25,18 +25,30 @@ dig +short DS "$D" @1.1.1.1                                      # is DNSSEC on?
 - If the apex already has a CNAME or serves a live site, this is a cutover. Export the zone's
   DNS records before touching anything.
 
-## 2. What the starter does not have yet
+## 2. What only the owner can supply
 
-The build enforces the first row. The rest are the launch floor in section 7 of
-`docs/archive/technical-brief.md`, and none of them is built here:
+The starter ships the whole launch floor in section 7 of
+`docs/archive/technical-brief.md`: the legal pages, icons, a share card, structured data,
+`sitemap.xml` and `llms.txt`. What it cannot ship is this site's own content. The build
+enforces the first three rows:
 
-| Missing | Where it goes |
+| Needed | Where it goes |
 |---|---|
-| Real privacy and terms text | `src/pages/privacy.astro`, `src/pages/terms.astro` |
-| Icons: `favicon.ico`, an SVG icon, the Apple touch icon, a web manifest | `public/`, linked from `src/layouts/Base.astro` |
-| A social share card: Open Graph tags and a 1200x630 image | `src/layouts/Base.astro`, fed from `src/site.ts` |
-| Structured data (JSON-LD `WebSite`) | `src/layouts/Base.astro` |
-| A check on real phones at 320 and 390 px wide | by hand |
+| Real privacy policy, terms and accessibility text | `src/pages/privacy-policy.astro`, `src/pages/terms.astro`, `src/pages/accessibility.astro`; then `legalUpdated` in `src/site.ts` |
+| The site's own icons and share image | the six files in `public/`, under the same names and sizes (step 1, part 6) |
+| The share image's alt text: what the image shows | `shareImage.alt` in `src/site.ts` |
+| A publisher for the structured data, only if it is true | `publisher` in `src/site.ts` |
+| A contact for accessibility reports: an alias, never a personal address | `contact` in `src/site.ts` |
+| The AI-crawler decision | `aiCrawlers` in `src/site.ts`, and the same setting in part 5 |
+
+And by hand, because no tool can:
+
+- Real phones at 320 and 390 px wide: iOS Safari and Android Chrome.
+- A screen reader on every page (VoiceOver with Safari, or NVDA with Firefox), and the whole
+  site by keyboard alone.
+- 200% zoom, and the text-spacing overrides, with nothing clipped.
+- `npm run audit` and the table in step 1, part 5a, on the launch branch's preview.
+- The accessibility page then says what was tested and when. Until it does, it is not true.
 
 ## 3. The launch switch: one pull request
 
@@ -56,11 +68,16 @@ In `wrangler.jsonc`, add the route and turn the platform hostname off:
 
 What the switch does, all of it tested by building both ways (LOCAL):
 
-- every page except the 404 loses `noindex` and gains `<link rel="canonical">` on the new origin
-- `robots.txt` gains `Sitemap: https://<apex>/sitemap-index.xml`
-- the sitemap lists every page on the new origin, with trailing slashes, and leaves out the 404
-- `npm run build` fails if the URL is still `example.com`, the name is still "Site name", or
-  the privacy or terms page still carries starter text
+- every page except the 404 loses `noindex` and gains `<link rel="canonical">`, a share card
+  and, on the home page, structured data, all on the new origin
+- `robots.txt` gains `Sitemap: https://<apex>/sitemap.xml`
+- `sitemap.xml` appears. It lists every page on the new origin, with trailing slashes and a
+  last-modified date where one is known, and leaves out the 404
+- `llms.txt` appears, if `aiCrawlers` is `'allow'`
+- `npm run build` fails if the URL is still `example.com`, the name is still "Site name", a
+  legal page still carries starter text, or the icons, the share image or its alt text are
+  still the starter's
+- `npm run build` also fails if any of those consumers is out of step with the others
 
 Merging it deploys the site on the domain. Cloudflare creates the DNS record and the
 certificate itself (DOCS).
@@ -121,7 +138,7 @@ the site that is not in the repo, so each stays off unless it was decided on pur
 | Minimum TLS version | not recorded | 1.2 | | DOCS |
 | Rocket Loader | not recorded | Off | It rewrites scripts, which fights the CSP and hydration. | DOCS |
 | Bot Fight Mode | not recorded | Off | Bot features can set cookies, which would make the privacy page's "no cookies" untrue. | LIVE |
-| AI crawler policy (Security, Bot traffic) | Allow | What `docs/project.md` says, matching `robots.txt` | If a policy blocks and Bot Preference Sync is on, Cloudflare prepends its own rules to the served `robots.txt`. | DOCS |
+| AI crawler policy (Security, Bot traffic) | Allow | What `aiCrawlers` in `src/site.ts` says | The file is a request and this setting is the enforcement, so the two must agree. If a policy blocks and Bot Preference Sync is on, Cloudflare prepends its own rules to the served `robots.txt`. | DOCS |
 
 Leave alone: no Cache Rules and no Edge Cache TTL; HSTS in the dashboard stays off because
 `public/_headers` sends it; Zaraz not configured; Development Mode off.
@@ -175,7 +192,9 @@ then also checks:
 
 - production sends no `X-Robots-Tag` and no `noindex` meta, and the canonical is `https://$D/`
 - `www` answers 301 to the apex and keeps the path and query; `http` goes to `https`
-- `robots.txt` names a sitemap, and that sitemap answers 200
+- `robots.txt` names a sitemap, that sitemap answers 200 and lists the home page
+- the share image is on this host and is a PNG, and the home page carries structured data
+- `llms.txt` answers 200 if `robots.txt` allows AI crawlers, and 404 if it blocks them
 - nameservers are Cloudflare's, the three no-mail records are present, and DNSSEC validates
 
 **The last line of checks assumes a no-mail domain with DNSSEC on.** If this site has mail at
@@ -194,7 +213,10 @@ checks over the sitemap.
    first list every subdomain of the zone, including DNS-only ones that point at other
    services: all of them are then committed to HTTPS. No `preload`.
 3. Optional: add the domain to Google Search Console as a domain property, verified by a
-   DNS-only TXT record, and submit the sitemap.
-4. In `docs/project.md`, record **that** each dashboard setting was set, by whom and when. Do
+   DNS-only TXT record, and submit `https://<apex>/sitemap.xml`.
+4. Check the share card in a validator, and the structured data in the Rich Results Test.
+   Previews are cached: to change the card, add the new image under a new file name and
+   change `shareImage.path` in `src/site.ts`.
+5. In `docs/project.md`, record **that** each dashboard setting was set, by whom and when. Do
    not keep a copy of the values: it drifts from the dashboard and then reads as fact. To
    learn the zone's state, read the zone or run the script.

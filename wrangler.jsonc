@@ -1,0 +1,17 @@
+{
+  // Must equal the Worker's name in the Cloudflare dashboard. It appears in the public
+  // workers.dev hostname, so treat it as permanent.
+  "name": "progenitor",
+  "compatibility_date": "2026-11-25",
+  // No "main": an assets-only Worker has no code. Its absence keeps the site static.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  // The platform hostname. On until a domain is attached (docs/setup/4-launch.md).
+  "workers_dev": true,
+  // Version URLs: a public URL per uploaded version. These are not pull-request previews.
+  "preview_urls": false,
+  // Pull-request previews are built with `wrangler preview`, which reads this block.
+  "previews": {}
+}

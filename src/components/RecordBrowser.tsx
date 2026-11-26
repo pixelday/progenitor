@@ -35,8 +35,9 @@ export default function RecordBrowser({ records, categories }: Props) {
   return (
     // The site's CSP has no nonce to give, so Base UI must not inject <style> elements.
     <CSPProvider disableStyleElements>
-      <section className={css({ display: 'grid', gap: '4' })}>
-        <div className={css({ display: 'flex', flexWrap: 'wrap', gap: '3', alignItems: 'center' })}>
+      <div className={css({ display: 'grid', gap: '4' })}>
+        {/* <search> is the landmark for a set of filter controls. */}
+        <search className={css({ display: 'flex', flexWrap: 'wrap', gap: '3', alignItems: 'center' })}>
           <Input
             type="search"
             aria-label="Search records"
@@ -48,7 +49,7 @@ export default function RecordBrowser({ records, categories }: Props) {
               px: '3',
               py: '2',
               borderWidth: '1px',
-              borderColor: 'gray.400',
+              borderColor: 'gray.500',
               rounded: 'md',
               _focusVisible: focusRing,
             })}
@@ -69,7 +70,7 @@ export default function RecordBrowser({ records, categories }: Props) {
                   px: '3',
                   py: '1.5',
                   borderWidth: '1px',
-                  borderColor: 'gray.400',
+                  borderColor: 'gray.500',
                   rounded: 'full',
                   fontSize: 'sm',
                   cursor: 'pointer',
@@ -100,7 +101,7 @@ export default function RecordBrowser({ records, categories }: Props) {
           >
             Reset filters
           </button>
-        </div>
+        </search>
 
         <p aria-live="polite" className={css({ fontSize: 'sm', color: 'gray.600' })}>
           {visible.length} of {records.length} shown
@@ -127,7 +128,7 @@ export default function RecordBrowser({ records, categories }: Props) {
             </li>
           ))}
         </ul>
-      </section>
+      </div>
     </CSPProvider>
   );
 }

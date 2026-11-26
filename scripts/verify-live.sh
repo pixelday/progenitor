@@ -2,7 +2,7 @@
 # verify-live.sh <host> <expected-commit-sha> [prod|preview]
 #   prod (default): <host> is the production domain. Every check, including www, http and DNS.
 #   preview: <host> is a workers.dev hostname (a PR Preview or the production alias).
-#            Page checks only, and the host must send noindex.
+#            Page, icon and legal-page checks only, and the host must send noindex.
 # Prints PASS/FAIL per check; exits 1 if any check failed.
 set -uo pipefail
 D=${1:?host}; SHA=${2:?expected commit sha}; MODE=${3:-prod}
@@ -15,6 +15,7 @@ eq()    { [ "$1" = "$2" ]; }
 get()   { curl -sS --max-time 15 -A 'verify-live' -H "$H" "$@"; }
 code()  { get -o /dev/null -w '%{http_code}' "$1"; }
 dest()  { get -o /dev/null -w '%{redirect_url}' "$1"; }
+ctype() { get -o /dev/null -w '%{content_type}' "$1"; }
 hdrs()  { get -D - -o /dev/null "$1"; }
 blanket() { sed 's/#.*//' <<<"$1" | tr -d '\r' | awk '   # prints a Disallow: / that applies to *
   { l = tolower($0); sub(/^[ \t]+/, "", l) }
@@ -43,6 +44,15 @@ check "CSP meta (404)"               has "<meta[^>]*http-equiv=[\"']?content-sec
 ROBOTS=$(get "https://$D/robots.txt")
 check "robots.txt 200"               eq "$(code "https://$D/robots.txt")" 200
 check "robots.txt doesn't block *"   eq "$(blanket "$ROBOTS")" ""
+for f in favicon.ico favicon.svg apple-touch-icon.png icon-192.png icon-512.png manifest.webmanifest; do
+  check "/$f 200"                    eq "$(code "https://$D/$f")" 200
+done
+check "favicon.ico is an icon"       has '^image/(x-icon|vnd\.microsoft\.icon)' "$(ctype "https://$D/favicon.ico")"
+check "manifest is a manifest"       has '^application/manifest\+json' "$(ctype "https://$D/manifest.webmanifest")"
+check "privacy policy 200"           eq "$(code "https://$D/privacy-policy/")" 200
+check "terms 200"                    eq "$(code "https://$D/terms/")" 200
+check "accessibility 200"            eq "$(code "https://$D/accessibility/")" 200
+check "sitemap page 200"             eq "$(code "https://$D/sitemap/")" 200
 
 if [ "$MODE" = preview ]; then
   check "noindex on this host"       has '^x-robots-tag:.*noindex' "$PH"
@@ -56,6 +66,16 @@ else
   SMAP=$(sed -nE 's/^[Ss]itemap:[[:space:]]*([^[:space:]]+).*/\1/p' <<<"$ROBOTS" | head -n1)
   check "robots.txt has Sitemap"     has "^Sitemap: https://$D/" "$ROBOTS"
   check "named sitemap is 200"       eq "$(code "${SMAP:-https://$D/sitemap.xml}")" 200
+  check "sitemap lists the home page" has "<loc>https://$D/</loc>" "$(get "https://$D/sitemap.xml")"
+  OGIMG=$(grep -oE '<meta property="og:image" content="[^"]+"' <<<"$PB" | sed -E 's/.*content="([^"]+)"/\1/' | head -n1)
+  check "share image is on this host" has "^https://$D/" "$OGIMG"
+  check "share image is a PNG"       has '^image/png' "$(ctype "${OGIMG:-https://$D/social.png}")"
+  check "structured data present"    has 'application/ld\+json' "$PB"
+  if has '^user-agent:[[:space:]]*GPTBot' "$ROBOTS"; then
+    check "no llms.txt (AI blocked)"   eq "$(code "https://$D/llms.txt")" 404
+  else
+    check "llms.txt 200 (AI allowed)"  eq "$(code "https://$D/llms.txt")" 200
+  fi
   check "nameservers on Cloudflare"  has 'ns\.cloudflare\.com\.?$' "$(dig +short NS "$D" @1.1.1.1)"
   check "null MX"                    eq "$(dig +short MX "$D" @1.1.1.1)" "0 ."
   check "SPF -all"                   has '"v=spf1 -all"' "$(dig +short TXT "$D" @1.1.1.1)"

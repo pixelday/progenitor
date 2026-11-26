@@ -35,6 +35,7 @@ git config user.name  "<name to show on commits>"
 git config user.email "<id>+<login>@users.noreply.github.com"
 git add README.md AGENTS.md CLAUDE.md .gitignore .npmrc .nvmrc .claude/settings.json .codex .gemini \
         package.json package-lock.json astro.config.ts panda.config.ts tsconfig.json wrangler.jsonc \
+        .htmlvalidate.mjs LICENSE \
         docs public scripts src
 git status --short                 # read it: every line starts with "A", and nothing is left untracked
 git commit -m "Start from the static site starter"
@@ -92,8 +93,13 @@ on GitHub's side stops a push to `main`, and once step 3 is done **a push to `ma
 production deploy**. "Every change goes through a pull request" is a convention. What backs it:
 
 - `AGENTS.md` forbids agent sessions from pushing, and `.claude/settings.json` denies the
-  plain `git push` shapes. `docs/archive/workspace.md` proposes stronger guards; they are not installed.
+  plain `git push` shapes. `docs/archive/workspace.md` proposes stronger guards; they are
+  not installed.
 - The build runs the checks, so a broken change fails before it deploys (step 1).
+
+**If the repository is public**, the limit above does not apply. Add a ruleset for `main`
+that requires a pull request before merging and blocks force pushes, and GitHub enforces
+the convention.
 
 ## 5. The Cloudflare GitHub App
 

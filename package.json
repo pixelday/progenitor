@@ -1,5 +1,5 @@
 {
-  "name": "static-site-starter",
+  "name": "progenitor",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,12 +11,12 @@
     "dev": "astro dev",
     "check": "astro check",
     "test": "vitest run",
-    "build": "astro check && vitest run && astro build && node scripts/verify-dist.mjs",
-    "preview": "wrangler dev"
+    "build": "astro check && vitest run && astro build && html-validate dist && node scripts/verify-dist.mjs",
+    "preview": "wrangler dev",
+    "audit": "node scripts/audit.mjs"
   },
   "dependencies": {
     "@astrojs/react": "7.1.9",
-    "@astrojs/sitemap": "3.7.6",
     "@base-ui/react": "1.9.0",
     "astro": "7.4.13",
     "react": "19.3.1",
@@ -30,6 +30,9 @@
     "@pandacss/vite": "2.6.0",
     "@types/react": "19.3.3",
     "@types/react-dom": "19.3.0",
+    "axe-core": "4.14.1",
+    "html-validate": "11.22.1",
+    "playwright-core": "1.65.1",
     "typescript": "6.0.3",
     "vitest": "5.1.2",
     "wrangler": "4.168.0"

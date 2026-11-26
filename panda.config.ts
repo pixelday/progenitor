@@ -18,6 +18,9 @@ export default defineConfig({
     // Base UI would have injected as an inline <style> lives here instead.
     '.base-ui-disable-scrollbar': { scrollbarWidth: 'none' },
     '.base-ui-disable-scrollbar::-webkit-scrollbar': { display: 'none' },
+    // Astro's island wrappers must not affect layout. Astro would inject this rule as a
+    // <style> in <body>; astro.config.ts removes that element, so the rule lives here.
+    'astro-island, astro-slot, astro-static-slot': { display: 'contents' },
   },
 
   theme: { extend: {} },

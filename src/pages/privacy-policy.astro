@@ -1,0 +1,50 @@
+---
+import Prose from '../components/Prose.astro';
+import Base from '../layouts/Base.astro';
+import { pages } from '../lib/pages';
+import { site } from '../site';
+
+const page = pages.privacy;
+---
+
+<Base title={page.title} description={page.description}>
+  <Prose>
+    <h1>{page.title}</h1>
+    <p>Last updated <time datetime={site.legalUpdated}>{site.legalUpdated}</time>.</p>
+    {/* verify-dist.mjs refuses to build a launched site while this attribute is present. */}
+    <p data-starter-placeholder>Starter text. Review and replace it before launch.</p>
+
+    <h2 id="stored-on-your-device">What is stored on your device</h2>
+    <p>
+      The category filters you choose on the home page are saved in your browser’s local storage, so
+      they are still set when you come back. Nothing else is stored. To remove it, use “Reset
+      filters” on the home page or clear this site’s data in your browser.
+    </p>
+
+    <h2 id="sent-anywhere">What is sent anywhere</h2>
+    <p>
+      Nothing. The site’s code never transmits what it stores. There are no cookies, no analytics
+      and no tracking, and the site loads nothing from any other website.
+    </p>
+
+    <h2 id="the-host">The host</h2>
+    <p>
+      The site is served by Cloudflare. Like any web host, Cloudflare processes standard request
+      data, such as IP addresses, in order to deliver each page.
+    </p>
+
+    <h2 id="changes">Changes to this policy</h2>
+    <p>If what the site stores or sends ever changes, this page changes in the same release.</p>
+
+    {
+      site.contact && (
+        <Fragment>
+          <h2 id="contact">Contact</h2>
+          <p>
+            Questions about this policy: <a href={`mailto:${site.contact}`}>{site.contact}</a>.
+          </p>
+        </Fragment>
+      )
+    }
+  </Prose>
+</Base>

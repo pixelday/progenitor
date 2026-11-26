@@ -25,7 +25,16 @@ installed package or the current docs before trusting a remembered API.
 - **Content collections:** the config is `src/content.config.ts`, loaders come from
   `astro/loaders`, `z` comes from `astro/zod`, and every collection needs a loader. (LOCAL)
 - **`astro:content` cannot be imported in client code.** `import type` is fine, which is how
-  `src/lib/records.ts` is shared with the island. (LOCAL)
+  `src/lib/records.ts` is shared with the island. `src/lib/site-map.ts` reads the collection,
+  so no island may import it. (LOCAL)
+- **An endpoint that returns an empty response writes no file.** `src/pages/sitemap.xml.ts`
+  and `src/pages/llms.txt.ts` return status 204 with no body before launch, and `astro build`
+  then creates neither. A 4xx status does the same but logs a warning on every build. (LOCAL)
+- **`sitemap.xml` is an endpoint, not `@astrojs/sitemap`.** The integration always writes
+  `sitemap-index.xml` plus `sitemap-0.xml`; it has no single-file mode. The endpoint reads the
+  page registry, adds `<lastmod>`, and `verify-dist` checks it against the built pages. (LOCAL)
+- **Astro does not evaluate `{expressions}` inside `<script>`.** Structured data therefore
+  needs `set:html`, in one file: `src/components/JsonLd.astro`, which escapes `<`. (LOCAL)
 
 ## Panda CSS
 
@@ -76,6 +85,14 @@ installed package or the current docs before trusting a remembered API.
 - **Astro owns scripts and styles.** `security.csp` in `astro.config.ts` writes a `<meta>`
   policy into every page, with a hash for each inline block Astro emits. An island page gets
   seven script hashes and one style hash. (LOCAL)
+- **Astro writes a `<style>` into `<body>` beside the first island**, which the W3C checker
+  rejects with two errors. Astro has no option for it. `astro.config.ts` removes the element
+  after the build and `panda.config.ts` carries the same rule. `verify-dist` fails if a
+  `<style>` is ever left in a `<body>`, which is also how a change in Astro's markup would
+  show. (LOCAL)
+- **A structured-data block gets a hash too.** Browsers do not apply `script-src` to a data
+  block, but the W3C checker warns about one. `JsonLd.astro` adds the block's hash with
+  `Astro.csp.insertScriptHash`. (LOCAL)
 - **`public/_headers` carries only what a `<meta>` cannot**, plus `base-uri`, `form-action` and
   `object-src`. A `script-src` in the header blocks the island even though the `<meta>` allows
   it, because the browser enforces both. (LOCAL: tested in Chrome 158 both ways)

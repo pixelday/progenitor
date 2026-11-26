@@ -1,0 +1,32 @@
+---
+// The sitemap for people. It reads the same list as sitemap.xml and llms.txt
+// (src/lib/site-map.ts), so the three cannot disagree.
+import Prose from '../components/Prose.astro';
+import Base from '../layouts/Base.astro';
+import { pages } from '../lib/pages';
+import { siteMap } from '../lib/site-map';
+
+const page = pages.sitemap;
+const groups = await siteMap();
+const slug = (heading: string) => heading.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+---
+
+<Base title={page.title} description={page.description}>
+  <Prose>
+    <h1>{page.title}</h1>
+    {
+      groups.map((group) => (
+        <Fragment>
+          <h2 id={slug(group.heading)}>{group.heading}</h2>
+          <ul>
+            {group.pages.map((entry) => (
+              <li>
+                <a href={entry.path}>{entry.title}</a>
+              </li>
+            ))}
+          </ul>
+        </Fragment>
+      ))
+    }
+  </Prose>
+</Base>

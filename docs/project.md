@@ -27,7 +27,10 @@ Cloudflare:      <the account that holds the Worker and the zone; who has a logi
 Worker name:     <the name in wrangler.jsonc: public and permanent>
 deadline:        <a date and its reason, or "none">. A deadline cuts scope, never the checks.
 analytics:       <none, or which and why>
-AI crawlers:     <allowed or blocked; robots.txt and the Cloudflare dashboard must agree>
+AI crawlers:     <allowed or blocked>. `aiCrawlers` in src/site.ts holds the value; the
+                 Cloudflare dashboard must be set to agree.
+contact:         <the alias published for accessibility reports, or "none">
+legal pages:     <who reviewed the privacy policy, terms and accessibility text, and when>
 data:            src/data/records.yml, with its schema in src/content.config.ts.
                  <What the records are and where the facts come from.>
 ```

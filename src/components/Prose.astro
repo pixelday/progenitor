@@ -1,0 +1,17 @@
+---
+// Long-form text: the legal pages and anything else that reads as a document.
+// One place sets the measure and the heading scale, so those pages cannot drift apart.
+import { css } from 'styled-system/css';
+
+const prose = css({
+  display: 'grid',
+  gap: '4',
+  maxW: '65ch',
+  '& h1': { fontSize: '3xl', fontWeight: 'bold' },
+  '& h2': { fontSize: 'xl', fontWeight: 'semibold', mt: '4' },
+  '& a': { textDecoration: 'underline', _hover: { textDecoration: 'none' } },
+  '& ul': { listStyleType: 'disc', pl: '6', display: 'grid', gap: '1' },
+});
+---
+
+<div class={prose}><slot /></div>
