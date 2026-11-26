@@ -70,8 +70,8 @@ Each claim in `docs/setup/` carries one of these tags.
 - **Step 3 has been run, and its live check passes.** On 2026-11-26 the Worker was created,
   a merge to `main` built and deployed it, and `scripts/verify-live.sh` printed 36 `PASS`
   lines against the `workers.dev` hostname. `npm run audit` printed thirteen `PASS` lines
-  against the same host. One part is not proven: no branch preview has been reached at an
-  address (`docs/setup/3-cloudflare.md`, part 6).
+  against the same host. A branch preview passed both at its own address before its merge
+  (`docs/setup/3-cloudflare.md`, part 6).
 - **Step 4 has never been run with this starter.** Its settings are LIVE or DOCS.
 - **No second site has been built from it yet.** Until one has, "copy it and change only the
   data and the settings" is a design goal, not a result.

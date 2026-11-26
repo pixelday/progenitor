@@ -3,8 +3,7 @@
 As of 2026-11-26. **This step has been run with this starter, and its live check passes.**
 The Worker was created, a merge to `main` built and deployed it, and `verify-live.sh` printed
 only `PASS` (part 5). What the deploys showed is tagged **DEPLOYED**. Everything else is
-**DOCS** unless tagged. One thing is left: no branch preview has been reached at an address
-(part 6).
+**DOCS** unless tagged. A branch preview passed the same check at its own address (part 6).
 
 No domain is needed. The site goes live on `https://<worker-name>.<subdomain>.workers.dev`,
 which sends `noindex` (DEPLOYED). `<subdomain>` is the Cloudflare account's, not the
@@ -61,9 +60,9 @@ and production deployed, the same hostnames stopped answering `error code: 1042`
 answered Cloudflare's own plain "Page not found" instead: preview hostnames were on, and no
 preview stood behind those names.
 
-**OPEN:** that the next branch's preview answers at its address. That a preview needs
-`preview_urls` comes from Wrangler 4.168's schema and from its own message for a preview with
-no active URL.
+The next branch's preview then answered at
+`https://<branch>-<worker-name>.<subdomain>.workers.dev`, with the branch's commit in its
+marker (DEPLOYED).
 
 **OPEN:** whether an empty `previews` block is required for branch builds, or merely allowed.
 A branch build ran with the block present (DEPLOYED).
@@ -173,30 +172,47 @@ file under `/_astro/` was `immutable`, and HTML was `max-age=0, must-revalidate`
 
 Then check the island on the deployed host. `npm run audit -- https://<host>` does it in
 Chrome. Against the deployed host it printed thirteen `PASS` lines, among them "no console
-message, so no Content Security Policy violation" (DEPLOYED).
+message, so no Content Security Policy violation" (DEPLOYED). It printed the same thirteen
+against a branch preview.
+
+**A branch preview answers an unknown path differently from production** (DEPLOYED):
+
+- A request that says it is a page load, with the header `Sec-Fetch-Mode: navigate`, gets
+  the site's own 404 page and all six security headers. A browser sends that header.
+- Any other request gets a bare nine-byte "Not found" with none of the six.
+- Production serves its 404 page to every request.
+
+`verify-live.sh` sends the header, so its 404 lines report what a visitor sees. Without it,
+eight of its lines fail on a preview. A plain `curl` of a missing path on a preview shows the
+bare answer.
+
+A preview hostname sends `X-Robots-Tag: noindex` on that bare answer too, which carries none
+of the rules in `public/_headers`. So Cloudflare adds `noindex` on previews itself.
 
 ## 6. Prove the whole loop once
 
 1. On a branch, change one word in `src/data/records.yml`. The owner pushes it and opens a
    pull request.
-2. Find the preview's address and run `verify-live.sh` in `preview` mode against it, with the
-   branch's commit. Cloudflare comments on the pull request with a table, "Preview
-   Deployments by commit", that has a "Deployment URL" column (DEPLOYED). **OPEN:** that the
-   column carries the address. On the one pull request that got the comment, the preview had
-   no address and the column stayed empty.
+2. Wait for the build check on the pull request. The preview is then at
+   `<branch>-<worker-name>.<subdomain>.workers.dev` (DEPLOYED). Run `verify-live.sh` in
+   `preview` mode against it, with the branch's commit:
+
+   ```bash
+   bash scripts/verify-live.sh <branch>-<worker-name>.<subdomain>.workers.dev "$(git rev-parse <branch>)" preview
+   ```
 3. Run the "branch contains `main`" check from step 2, then the owner merges.
 4. Wait for the green check on the merge commit, then run `verify-live.sh` against the
    production hostname with the new `main` commit.
 
-Run on 2026-11-26, all but item 2 (DEPLOYED). A pushed branch started a preview build 16
-seconds after the push, and the pull request showed its build check. The merge started a
-production build, and `verify-live.sh` passed against production with the merge commit. So
-auto-deploy is seen, not assumed. What is still assumed is that a preview can be checked
-before the merge: on both pull requests that built a preview, it had no address (part 2).
+Every item has been seen on 2026-11-26 (DEPLOYED). A pushed branch started a preview build
+within a minute of the push, and the pull request showed its build check. The preview
+passed `verify-live.sh`: 36 `PASS` lines. A merge started a production build, and the script
+passed against production with the merge commit.
 
-Cloudflare's comment came on the second of those pull requests, whose branch set
-`preview_urls` to `true`. The first, with the setting `false`, got a build check and no
-comment.
+Do not wait for a comment from Cloudflare to learn the address. Of the three pull requests
+that built a preview, one got a comment, a table named "Preview Deployments by commit". Its
+"Deployment URL" column was empty, because that preview had no address (part 2). The pull
+request whose preview did have an address got no comment.
 
 ## 7. Know these before they are needed
 
