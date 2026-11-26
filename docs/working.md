@@ -1,1 +1,111 @@
 # Working
+
+Open items for developing the starter itself, as of 2026-11-26. A site built from the starter
+can delete this file: its own backlog goes in `docs/index.md`.
+
+Each item says what is open and what would settle it. When one is done, delete it here and
+record the result where it belongs: the step in `docs/setup/`, or "What has been proven" in
+`README.md`.
+
+## Where things stand
+
+From a fresh clone, on Node 24.22.3, all of this ran on 2026-11-26:
+
+- `npm ci`, then `npm run build`: fifteen `PASS` lines.
+- `npm run preview`, then `npm run audit`: thirteen `PASS` lines.
+- `npx wrangler deploy --dry-run` accepts `wrangler.jsonc`. It uploads nothing.
+
+Nothing has been deployed, and no second site has been built from the starter.
+
+## Get it online
+
+The owner does these. A session can verify each one.
+
+1. **Read `docs/archive/` before the first push.** The repository is public, so the archive is
+   published with it. Decide whether all four files stay.
+2. **Merge the import.** Push the branch `claude-import-starter`, open a pull request and merge
+   it with a merge commit.
+3. **Add a ruleset for `main`:** require a pull request, block force pushes
+   (`docs/setup/2-github.md`, part 4).
+4. **Install Node 24.22.3 on the development machine.** It had 21.1.0, which the starter
+   refuses. The runs above used a temporary copy of 24.22.3.
+5. **Confirm the Worker's name before creating the Worker.** `wrangler.jsonc` says
+   `progenitor`. The name appears in the public `workers.dev` hostname and must equal the name
+   in the dashboard, so treat it as permanent. `package.json` carries the same name.
+6. **Do step 3** (`docs/setup/3-cloudflare.md`). The first deploy settles what is still marked
+   OPEN:
+   - the build image supplies Node 24.22.3
+   - `_headers` applies on Workers, including to the 404 response
+   - the `workers.dev` rule in `public/_headers` sends `X-Robots-Tag: noindex` on the
+     production hostname
+   - `WORKERS_CI_COMMIT_SHA` is the variable's name: if the deployed page's marker says
+     `local`, it is not
+   - Cloudflare's build status shows on pull requests while GitHub Actions is disabled
+   - the empty `previews` block in `wrangler.jsonc` is needed, or merely allowed
+
+   Then correct the step, and update "What has been proven" in `README.md`.
+7. **Set a commit identity in every clone.** This clone commits as a GitHub noreply address
+   (`docs/setup/2-github.md`, part 2). A clone on another machine needs the same before its
+   first commit: a global git identity is usually a personal or work address, and this
+   repository is public.
+
+## Decide
+
+- **A public demo of the starter.** The build refuses to launch the starter as it stands.
+  With `launched: true` it fails on the URL, the name, the three legal pages, the icons, the
+  share image and its alt text. That is what the check is for. If the starter itself should
+  ever be live and indexable on a domain, that needs a deliberate exception.
+- **The restored config.** `astro.config.ts`, `wrangler.jsonc` and `.gemini/settings.json` were
+  rewritten from the docs on 2026-11-25. If the originals turn up, compare them.
+- **Agent files in the site's repository.** `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.codex/` and
+  `.gemini/` ship beside the site. Decide whether a site built from the starter keeps them.
+- **Stronger agent guards.** `docs/archive/workspace.md` proposes them. None is installed or
+  tested.
+- **The manifest's `display` value.** It is `browser`. `standalone` would let a browser offer
+  the site as an installable app.
+- **The React island.** The home page ships 83.4 KB of gzipped JavaScript for a search box and
+  three toggles, and about 67 KB of that is React. The assessment in `docs/archive/`
+  recommends plain HTML and a small script for a control this simple.
+- **The archive's future.** If `docs/archive/` goes, eight lines point into it. Find them with
+  `git grep -n 'docs/archive' -- . ':!docs/archive'`.
+
+## Build next
+
+- **Fingerprint all six assets.** `scripts/verify-dist.mjs` refuses a launched site that still
+  ships the starter's `favicon.svg`, `favicon.ico` or share image. `apple-touch-icon.png`,
+  `icon-192.png` and `icon-512.png` are not on that list.
+- **Guard the fingerprints.** If the starter's own icons change and the hashes in
+  `STARTER_ASSETS` do not, the check passes silently. Nothing catches that.
+- **Keep the tamper test.** Every check in `verify-dist` was proven by breaking a build on
+  purpose, forty ways, and confirming a `FAIL` each time. That harness ran from a temporary
+  folder and is not in the repository. Port it if the checks keep changing.
+- **A token layer.** Sixteen palette names such as `gray.900` are written into three files,
+  and `panda.config.ts` extends no theme. Semantic tokens would let a site change its colors
+  in one place.
+- **Color scheme and user preferences.** The page is light only. Nothing handles
+  `prefers-color-scheme`, `prefers-contrast` or `forced-colors`. `prefers-reduced-motion` has
+  nothing to act on, because nothing animates. `npm run audit` already loads every page in
+  dark mode, so it will test a dark scheme as soon as there is one.
+- **A second site.** Build one from the starter by changing only data and settings. Until
+  then, that claim is a design goal.
+- **The AI-crawler list.** `src/pages/robots.txt.ts` names five agents as of 2026-11-25. The
+  names were not checked against each vendor's documentation.
+- **The sample data's punctuation.** `src/data/records.yml` has a straight apostrophe in prose
+  ("this year's"). The legal pages use curly quotes.
+
+## Check by hand
+
+None of these has been run.
+
+- WAVE and Accessibility Insights, on the preview.
+- A screen reader on every page, and the whole site by keyboard alone.
+- Real phones at 320 and 390 px wide: iOS Safari and Android Chrome. Only desktop Chrome 158
+  has been used.
+- Firefox and Safari.
+- The W3C CSS validator. The Nu checker's CSS mode passed.
+- The Rich Results Test and a share-card validator. Both need a launched site on a public URL.
+- Non-text contrast, whenever colors change. No automated tool here measures it: borders and
+  focus rings need 3:1 against what is behind them.
+
+One note stands: the W3C checker prints an "info" on the home page, because React writes
+`<input/>`.

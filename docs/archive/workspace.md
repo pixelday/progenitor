@@ -17,7 +17,7 @@ numbers (§) refer to [technical-brief.md](technical-brief.md).
 | File | Now (in the starter) | Proposed |
 |---|---|---|
 | `AGENTS.md` | a shorter text: boundary, branch, no-push and attribution rules | §12.3's text, adapted to one repo |
-| `CLAUDE.md` | `@AGENTS.md` and `@docs/project.md` | as is |
+| `CLAUDE.md` | `@AGENTS.md` and `@docs/index.md` | as is |
 | `.claude/settings.json` | two deny rules: `Bash(git push:*)`, `Bash(git push *)` | §12.3 with six changes (below) |
 | `.codex/config.toml` | web search live, shell network **on** | network-off profile, web search kept |
 | `.codex/rules/no-remote-write.rules` | missing | new; §12.3's first rule |

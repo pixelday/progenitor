@@ -171,7 +171,7 @@ three records, so this part is DOCS.
 ## 7. Registrar and DNSSEC
 
 - Auto-renew on, a valid payment method on the account, the transfer lock on, and a registrant
-  email that someone reads. Copy the expiry date into `docs/project.md`.
+  email that someone reads. Copy the expiry date into `docs/index.md`.
 
   ```bash
   whois "$D" | grep -iE 'domain status|dnssec|expir'
@@ -217,6 +217,6 @@ checks over the sitemap.
 4. Check the share card in a validator, and the structured data in the Rich Results Test.
    Previews are cached: to change the card, add the new image under a new file name and
    change `shareImage.path` in `src/site.ts`.
-5. In `docs/project.md`, record **that** each dashboard setting was set, by whom and when. Do
+5. In `docs/index.md`, record **that** each dashboard setting was set, by whom and when. Do
    not keep a copy of the values: it drifts from the dashboard and then reads as fact. To
    learn the zone's state, read the zone or run the script.

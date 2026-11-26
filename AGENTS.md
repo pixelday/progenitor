@@ -1,4 +1,4 @@
-Before doing project work, read `README.md` and `docs/project.md`; treat them as the canonical project-context map and follow their references as needed for the current task.
+Before doing project work, read `README.md` and `docs/index.md`; treat them as the canonical project-context map and follow their references as needed for the current task.
 
 Treat the directory containing this file and its descendants as the complete project-context boundary. Except for platform and tool runtime paths automatically exposed by the sandbox, do not read, list, search, execute against, or modify paths outside that boundary unless the owner explicitly asks. If outside access appears necessary, explain why and obtain the owner's approval before proceeding.
 

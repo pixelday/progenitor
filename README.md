@@ -8,7 +8,7 @@ runtime data fetching. Records live in a YAML file and are rendered at build tim
 Stack: Astro (static output only), React + TypeScript for interactive islands, PandaCSS,
 Base UI, Cloudflare Workers static assets (free plan), one private GitHub repo (free plan).
 
-Start here. Everything a new session needs is in this file, `docs/project.md` and
+Start here. Everything a new session needs is in this file, `docs/index.md` and
 `docs/setup/`. `docs/stack-wiring.md` explains the config. `docs/archive/` is background from
 before the starter had code: where it disagrees with the files above, they win.
 
@@ -32,7 +32,7 @@ Optional:
 
 ## The path
 
-Fill in `docs/project.md` first. Then:
+Fill in `docs/index.md` first. Then:
 
 | Step | File | Who |
 |---|---|---|
@@ -92,10 +92,11 @@ There is no `deploy` script on purpose. Deploys come only from Cloudflare buildi
 ```
 README.md               this file
 AGENTS.md  CLAUDE.md    rules for agent tools
-docs/project.md         what this site is, and its current status: fill it in
+docs/index.md           what this site is, and its current status: fill it in
 docs/setup/             the four steps
 docs/stack-wiring.md    how Astro, React, Panda and Base UI are wired together
 docs/archive/           background from before the starter had code: not instructions
+docs/working.md         open items for developing the starter itself
 src/site.ts             the site's identity and its two switches: launched, AI crawlers
 src/lib/pages.ts        the page registry: every fixed page's path, title and description
 src/data/records.yml    the records: the source of truth for content

@@ -1,2 +1,2 @@
 @AGENTS.md
-@docs/project.md
+@docs/index.md

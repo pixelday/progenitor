@@ -74,7 +74,7 @@ A green check is not enough. In the log, confirm:
 3. **`npm run build` printed fifteen `PASS` lines** and `all passed`.
 4. **The deploy step uploaded the assets.**
 
-Record the Node line and anything unexpected in `docs/project.md`.
+Record the Node line and anything unexpected in `docs/index.md`.
 
 ## 5. Verify the deployed site
 

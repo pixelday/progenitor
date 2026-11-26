@@ -9,7 +9,7 @@
 > It was written before the starter had code, for a workspace of two repos. What the starter
 > does differently:
 > - **One repo.** Read `production/` as the repo root and `development/` as `docs/`, and drop
->   `git -C <repo>` and the subshells. `development/index.md` is `docs/project.md`.
+>   `git -C <repo>` and the subshells. `development/index.md` is `docs/index.md`.
 > - **The schema is Zod**, in `src/content.config.ts`, not JSON Schema. The rule in §1's data
 >   contract still holds: one schema, and it fails the build.
 > - **Node is pinned in `.nvmrc` only**, with no `NODE_VERSION` build variable (§4.2).

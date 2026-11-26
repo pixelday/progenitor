@@ -147,7 +147,7 @@ Run these by hand before launch and after any change to the layout. None is a de
 | `package.json` | `name`. |
 | `src/data/records.yml`, `src/content.config.ts` | The site's own records and their schema. Change both together. |
 | `src/pages/privacy-policy.astro`, `src/pages/terms.astro`, `src/pages/accessibility.astro` | Real text before launch, and `legalUpdated` in `src/site.ts`. The build refuses to launch with the starter text. |
-| `docs/project.md` | The profile and status. |
+| `docs/index.md` | The profile and status. |
 
 Then run `npm run build` again. It must end with `all passed`.
 
