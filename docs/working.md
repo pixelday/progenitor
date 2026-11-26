@@ -35,11 +35,12 @@ The owner does these. A session can verify each one.
    off. The Actions and Dependabot settings can't be read without Admin: confirm both on the
    settings page.
 3. **Check a branch preview** (`docs/setup/3-cloudflare.md`, part 6). It is the one part of
-   step 3 not yet seen. `preview_urls` in `wrangler.jsonc` is now `true`. Push a branch, then:
-   - find where Cloudflare gives the preview's address
-   - run `scripts/verify-live.sh` against it in `preview` mode. That also shows whether the
-     `workers.dev` rule in `public/_headers` sends `noindex` on a preview hostname
-   - see whether Cloudflare comments on the pull request once a preview has an address
+   step 3 not yet seen. `preview_urls` in `wrangler.jsonc` is `true`, and production has
+   deployed with it. Push a branch, then:
+   - see whether the "Deployment URL" column of Cloudflare's pull request comment carries the
+     preview's address. It was empty on the one comment so far
+   - run `scripts/verify-live.sh` against the address in `preview` mode. That also shows
+     whether the `workers.dev` rule in `public/_headers` sends `noindex` on a preview hostname
 
    Still open beside it:
    - whether Cloudflare's build status shows on pull requests with Actions disabled. It

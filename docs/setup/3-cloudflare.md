@@ -55,9 +55,15 @@ setting, on the Worker's Domains tab. It was turned on there while the file stil
 `false`. The next deploy turned it off again, and the preview hostnames answered 1042 as
 before. Set it in the file.
 
-**OPEN:** that a preview answers now that the file says `true`. That comes from Wrangler
-4.168's schema and from its own message for a preview with no active URL. It has not been
-seen on a deploy.
+**The setting takes effect once a production deploy has carried it** (DEPLOYED). The branch
+that first set it to `true` still got a preview with no address. After that branch was merged
+and production deployed, the same hostnames stopped answering `error code: 1042`. They
+answered Cloudflare's own plain "Page not found" instead: preview hostnames were on, and no
+preview stood behind those names.
+
+**OPEN:** that the next branch's preview answers at its address. That a preview needs
+`preview_urls` comes from Wrangler 4.168's schema and from its own message for a preview with
+no active URL.
 
 **OPEN:** whether an empty `previews` block is required for branch builds, or merely allowed.
 A branch build ran with the block present (DEPLOYED).
@@ -174,8 +180,10 @@ message, so no Content Security Policy violation" (DEPLOYED).
 1. On a branch, change one word in `src/data/records.yml`. The owner pushes it and opens a
    pull request.
 2. Find the preview's address and run `verify-live.sh` in `preview` mode against it, with the
-   branch's commit. **OPEN:** where Cloudflare gives the address. It left no comment on a
-   pull request whose preview had none.
+   branch's commit. Cloudflare comments on the pull request with a table, "Preview
+   Deployments by commit", that has a "Deployment URL" column (DEPLOYED). **OPEN:** that the
+   column carries the address. On the one pull request that got the comment, the preview had
+   no address and the column stayed empty.
 3. Run the "branch contains `main`" check from step 2, then the owner merges.
 4. Wait for the green check on the merge commit, then run `verify-live.sh` against the
    production hostname with the new `main` commit.
@@ -184,7 +192,11 @@ Run on 2026-11-26, all but item 2 (DEPLOYED). A pushed branch started a preview 
 seconds after the push, and the pull request showed its build check. The merge started a
 production build, and `verify-live.sh` passed against production with the merge commit. So
 auto-deploy is seen, not assumed. What is still assumed is that a preview can be checked
-before the merge: `preview_urls` was `false` then (part 2).
+before the merge: on both pull requests that built a preview, it had no address (part 2).
+
+Cloudflare's comment came on the second of those pull requests, whose branch set
+`preview_urls` to `true`. The first, with the setting `false`, got a build check and no
+comment.
 
 ## 7. Know these before they are needed
 
