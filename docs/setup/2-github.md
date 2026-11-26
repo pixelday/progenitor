@@ -150,8 +150,8 @@ gh api repos/OWNER/REPO/commits/<sha>/check-runs --jq '.check_runs[] | {name, st
 
 1. Branch from `main`, commit, and the owner pushes the branch.
 2. The owner opens a pull request. Cloudflare builds a preview and shows its build check on
-   the pull request (DEPLOYED). It also comments, with a column for the preview's URL.
-   Whether that column gets filled is open (step 3, part 6).
+   the pull request (DEPLOYED). The preview's address has a fixed shape: step 3, part 6.
+   Do not wait for a comment from Cloudflare to learn it.
 3. Review the preview. Before merging, check the branch already contains `main`, so the merge
    ships exactly what the preview showed (LOCAL):
 

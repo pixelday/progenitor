@@ -21,7 +21,8 @@ fifteen lines there.
 The starter is on `main` of its public GitHub repository, behind a ruleset that requires a
 pull request and blocks force pushes (`docs/setup/2-github.md`, part 4). It is deployed as a
 Worker on a `workers.dev` hostname, unlaunched and `noindex`, and a merge to `main` builds
-and deploys it. The live check passes: 36 `PASS` lines (`docs/setup/3-cloudflare.md`).
+and deploys it. The live check passes on production and on a branch preview: 36 `PASS` lines
+each (`docs/setup/3-cloudflare.md`).
 No second site has been built from the starter.
 
 ## Get it online
@@ -34,20 +35,11 @@ The owner does these. A session can verify each one.
    2026-11-26: squash merging, rebase merging and wikis are on, and the step turns all three
    off. The Actions and Dependabot settings can't be read without Admin: confirm both on the
    settings page.
-3. **Check a branch preview** (`docs/setup/3-cloudflare.md`, part 6). It is the one part of
-   step 3 not yet seen. `preview_urls` in `wrangler.jsonc` is `true`, and production has
-   deployed with it. Push a branch, then:
-   - see whether the "Deployment URL" column of Cloudflare's pull request comment carries the
-     preview's address. It was empty on the one comment so far
-   - run `scripts/verify-live.sh` against the address in `preview` mode. That also shows
-     whether the `workers.dev` rule in `public/_headers` sends `noindex` on a preview hostname
-
-   Still open beside it:
+3. **Settle two small questions in step 3** (`docs/setup/3-cloudflare.md`). The step itself
+   has been run end to end, a branch preview included.
    - whether Cloudflare's build status shows on pull requests with Actions disabled. It
      showed on 2026-11-26, with the Actions setting unconfirmed
    - whether the empty `previews` block in `wrangler.jsonc` is needed, or merely allowed
-
-   Then correct the step, and update "What has been proven" in `README.md`.
 4. **Set a commit identity in every clone.** This clone commits as a GitHub noreply address
    (`docs/setup/2-github.md`, part 2). A clone on another machine needs the same before its
    first commit: a global git identity is usually a personal or work address, and this
