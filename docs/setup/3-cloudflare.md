@@ -52,8 +52,8 @@ In `wrangler.jsonc`, set `name` and `compatibility_date` (step 1). The file as s
 starter shipped that way at first. A pushed branch's preview built and passed, and its
 hostname answered Cloudflare's `error code: 1042`. The dashboard has a switch for the same
 setting, on the Worker's Domains tab. It was turned on there while the file still said
-`false`, and after the next deploy the preview hostnames answered 1042 as before. Set it in
-the file.
+`false`. The next deploy turned it off again, and the preview hostnames answered 1042 as
+before. Set it in the file.
 
 **OPEN:** that a preview answers now that the file says `true`. That comes from Wrangler
 4.168's schema and from its own message for a preview with no active URL. It has not been
