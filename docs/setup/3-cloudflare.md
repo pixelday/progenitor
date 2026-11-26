@@ -1,9 +1,10 @@
 # Step 3. Deploy to a `workers.dev` hostname
 
-As of 2026-11-26. **The Worker has been created and its first build deployed** to a
-`workers.dev` hostname. What that showed is tagged **DEPLOYED**. Everything else is **DOCS**
-unless tagged. The step is not finished: two live checks fail (part 5), and part 6, the
-pull-request loop, has not been run. The remaining **OPEN** items wait on it.
+As of 2026-11-26. **This step has been run with this starter, and its live check passes.**
+The Worker was created, a merge to `main` built and deployed it, and `verify-live.sh` printed
+only `PASS` (part 5). What the deploys showed is tagged **DEPLOYED**. Everything else is
+**DOCS** unless tagged. One thing is left: no branch preview has been reached at an address
+(part 6).
 
 No domain is needed. The site goes live on `https://<worker-name>.<subdomain>.workers.dev`,
 which sends `noindex` (DEPLOYED). `<subdomain>` is the Cloudflare account's, not the
@@ -42,12 +43,24 @@ In `wrangler.jsonc`, set `name` and `compatibility_date` (step 1). The file as s
 | `assets.directory` | `./dist` | Astro's output. |
 | `assets.not_found_handling` | `404-page` | The default is `none`, an empty 404. This serves `404.html` with a 404 status (LOCAL, in `wrangler dev`). |
 | `workers_dev` | `true` | Gives the spike a hostname. Step 4 turns it off. Set it in the file: a dashboard-only toggle is undone by the next deploy. |
-| `preview_urls` | `false` | Version URLs: a public URL for every uploaded version. These are not pull-request previews. Wrangler 4.168's schema gives `false` as the default; it is written out so the dashboard can't differ. |
+| `preview_urls` | `true` | Gives previews an address, at hostnames ending `-<worker-name>.<subdomain>.workers.dev`. The cost is a public address for every uploaded version too. Wrangler 4.168's schema gives `false` as the default. |
 | `previews` | `{}` | Pull-request previews are built with `wrangler preview`, which reads this block. Empty means no overrides. |
 
 `npx wrangler deploy --dry-run` accepts this file (LOCAL). It uploads nothing.
 
+**With `preview_urls` set to `false`, a branch's preview has no address** (DEPLOYED). The
+starter shipped that way at first. A pushed branch's preview built and passed, and its
+hostname answered Cloudflare's `error code: 1042`. The dashboard has a switch for the same
+setting, on the Worker's Domains tab. It was turned on there while the file still said
+`false`. The next deploy turned it off again, and the preview hostnames answered 1042 as
+before. Set it in the file.
+
+**OPEN:** that a preview answers now that the file says `true`. That comes from Wrangler
+4.168's schema and from its own message for a preview with no active URL. It has not been
+seen on a deploy.
+
 **OPEN:** whether an empty `previews` block is required for branch builds, or merely allowed.
+A branch build ran with the block present (DEPLOYED).
 
 ## 3. Create the Worker
 
@@ -63,7 +76,7 @@ fields, with the values the starter was deployed with on 2026-11-26 (DEPLOYED):
 | Build command | `npm run build` | It runs the type check, the tests and `verify-dist` around the build. `npx astro build` alone would deploy without any of them. |
 | Deploy command | `npx wrangler deploy` | |
 | Preview command | `npx wrangler preview` | Builds the preview for a branch other than `main` (DOCS). |
-| Enable Preview builds | On | Every push to a branch other than `main` builds a preview, and the pull request gets its URL (DOCS). |
+| Enable Preview builds | On | Every push to a branch other than `main` builds a preview, and the pull request shows its build check (DEPLOYED). |
 | Protect with Cloudflare Access | Off | Not tried. `verify-live.sh` expects to reach the site without signing in. |
 | Path, under Advanced settings | `/` | The repo root. |
 | API token | Create new token | Cloudflare makes the build token described in part 1. |
@@ -82,22 +95,36 @@ disconnected from your Git account", the GitHub App cannot see the repo, and no 
 build (step 2, part 5). A first build that deployed does not show the repo is connected: on
 2026-11-26 the first build succeeded while the banner was up (DEPLOYED).
 
+The Worker's Domains tab lists two Worker URLs, each with a switch (DEPLOYED): Production,
+`<worker-name>.<subdomain>.workers.dev`, and Preview,
+`*-<worker-name>.<subdomain>.workers.dev`. `workers_dev` and `preview_urls` in
+`wrangler.jsonc` are the same two settings. Change the file, not the switch (part 2).
+
 ## 4. Read the first build log
 
-A green check is not enough. In the log, confirm:
+A green check is not enough. In the log, confirm the four things below. The lines quoted are
+from the starter's production build of 2026-11-26 (DEPLOYED).
 
-1. **Node is 24.22.3.** Workers Builds reads `.nvmrc`, and its image defaulted to Node 24.22.1
-   on 2026-11-25. The first build, on 2026-11-26, succeeded with no build variable set
-   (DEPLOYED). Its Node line was not copied here, so that the image supplied 24.22.3 is still
-   **OPEN** until someone reads the line.
+1. **Node is 24.22.3.** Workers Builds reads `.nvmrc`. With no build variable set, the log
+   said `Detected the following tools from environment: nodejs@24.22.3, npm@10.9.2`, then
+   `Installing nodejs 24.22.3`.
    - If the install step fails with `EBADENGINE`, the pin was not honored. Set a build variable
      `NODE_VERSION=24.22.3` and rebuild.
    - If the image cannot provide 24.22.3 at all, change `.nvmrc` and `engines.node` in
      `package.json` to the newest 24.x it offers, in one commit. Keep the two equal.
-2. **The install used the lockfile**, and `panda codegen` ran after it (the `prepare` script).
-   Without it, `astro check` fails on every `styled-system/...` import.
-3. **`npm run build` printed fifteen `PASS` lines** and `all passed`.
-4. **The deploy step uploaded the assets.**
+2. **The install used the lockfile:** `Installing project dependencies: npm clean-install
+   --progress=false`. `panda codegen` ran after it (the `prepare` script) and wrote
+   `styled-system`. Without it, `astro check` fails on every `styled-system/...` import.
+3. **`npm run build` printed fifteen `PASS` lines**, then `verify-dist: 12 pages checked, all
+   passed`.
+4. **The deploy step uploaded the assets** and printed the hostname. It lists only new or
+   modified assets, so a file that did not change is not on the list. Every HTML page is on
+   it after every commit, because each page carries the commit's marker.
+
+That build took a little over two minutes from start to finish.
+
+The detection line names npm 10.9.2. The development machine's Node 24.22.3 has npm 11.19.1.
+The log does not say which npm ran the install; it succeeded.
 
 Record the Node line and anything unexpected in `docs/index.md`.
 
@@ -120,39 +147,44 @@ Every line must say `PASS`. In `preview` mode it checks:
 - the host sends `X-Robots-Tag: noindex`
 
 The script is copied from `docs/archive/technical-brief.md`, where it was run against public
-hosts. Run against the first deploy on 2026-11-26, it printed 34 `PASS` lines and 2 `FAIL`
-(DEPLOYED):
+hosts. On 2026-11-26, after a merge to `main` had built and deployed, it printed 36 `PASS`
+lines and no `FAIL` against the starter's production hostname (DEPLOYED):
 
 | Was open | What the deploy showed |
 |---|---|
-| `_headers` applies on Workers, including to the 404 response | It does. The six headers arrived on the page and on the 404. If they ever do not, check that `dist/_headers` is in the build log's upload list. |
+| `_headers` applies on Workers, including to the 404 response | It does. The six headers arrived on the page and on the 404. |
 | The `workers.dev` rule in `public/_headers` matches the production hostname | It does: the host sent `X-Robots-Tag: noindex`. Never put `X-Robots-Tag` under `/*`: that de-indexes the real domain later. |
-| The marker equals the full commit SHA | **It did not.** The page carried `content="main"`. So `WORKERS_CI_COMMIT_SHA` is the variable's name, and on this build it held the branch name. Both `FAIL` lines are this one fact: the marker line, and the 404 line, which looks for the same SHA. |
+| The marker equals the full commit SHA | It does, on a build that a push started: `WORKERS_CI_COMMIT_SHA` held the merge commit's full SHA. |
 
-**OPEN:** whether a build started by a push carries the full SHA. The first build was started
-from the create screen, not by a push. The first pushed branch settles it (part 6). If its
-marker is a branch name too, fix the marker's source in `src/layouts/Base.astro` before
-trusting the two lines.
+**A build started from the dashboard has no commit** (DEPLOYED). The Worker's very first
+build was started by the create screen. Its marker read `main`, the Deployments list showed
+it as "Empty commit message", and two lines of this script failed: the marker line, and the
+404 line, which looks for the same SHA. They passed once a push-started build replaced it.
 
 The status codes and cache headers of step 1, part 4 were the same on the deployed host
 (DEPLOYED): `/terms` answered 307 to `/terms/`, `/sitemap.xml` and `/_headers` answered 404, a
 file under `/_astro/` was `immutable`, and HTML was `max-age=0, must-revalidate`.
 
 Then check the island on the deployed host. `npm run audit -- https://<host>` does it in
-Chrome. Against the first deploy it printed thirteen `PASS` lines, among them "no console
+Chrome. Against the deployed host it printed thirteen `PASS` lines, among them "no console
 message, so no Content Security Policy violation" (DEPLOYED).
 
 ## 6. Prove the whole loop once
 
 1. On a branch, change one word in `src/data/records.yml`. The owner pushes it and opens a
    pull request.
-2. Cloudflare comments with a preview URL. Run `verify-live.sh` in `preview` mode against it,
-   with the branch's commit.
+2. Find the preview's address and run `verify-live.sh` in `preview` mode against it, with the
+   branch's commit. **OPEN:** where Cloudflare gives the address. It left no comment on a
+   pull request whose preview had none.
 3. Run the "branch contains `main`" check from step 2, then the owner merges.
 4. Wait for the green check on the merge commit, then run `verify-live.sh` against the
    production hostname with the new `main` commit.
 
-Until this has run once, "auto-deploy is set up" is an assumption.
+Run on 2026-11-26, all but item 2 (DEPLOYED). A pushed branch started a preview build 16
+seconds after the push, and the pull request showed its build check. The merge started a
+production build, and `verify-live.sh` passed against production with the merge commit. So
+auto-deploy is seen, not assumed. What is still assumed is that a preview can be checked
+before the merge: `preview_urls` was `false` then (part 2).
 
 ## 7. Know these before they are needed
 

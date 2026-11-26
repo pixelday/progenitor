@@ -10,8 +10,10 @@
   },
   // The platform hostname. On until a domain is attached (docs/setup/4-launch.md).
   "workers_dev": true,
-  // Version URLs: a public URL per uploaded version. These are not pull-request previews.
-  "preview_urls": false,
+  // Preview hostnames: <name>-<worker>.<subdomain>.workers.dev. A branch's preview needs
+  // this on: with it off the preview builds and has no address. On, every uploaded version
+  // gets a public address too.
+  "preview_urls": true,
   // Pull-request previews are built with `wrangler preview`, which reads this block.
   "previews": {}
 }
