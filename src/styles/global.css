@@ -1,0 +1,2 @@
+/* Sets the cascade layer order only. The Panda Vite plugin injects the generated CSS. */
+@layer reset, base, tokens, recipes, utilities;

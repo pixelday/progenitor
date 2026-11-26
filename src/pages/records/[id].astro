@@ -1,0 +1,42 @@
+---
+// One static page per record, generated at build time. Ships no JavaScript.
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { css } from 'styled-system/css';
+import Base from '../../layouts/Base.astro';
+import { isoDate } from '../../lib/records';
+
+export async function getStaticPaths() {
+  const records = await getCollection('records');
+  return records.map((record) => ({ params: { id: record.id }, props: { record } }));
+}
+
+type Props = { record: CollectionEntry<'records'> };
+const { data } = Astro.props.record;
+const updated = isoDate(data.updated);
+const link = css({ textDecoration: 'underline', _hover: { textDecoration: 'none' } });
+---
+
+<Base title={data.name} description={data.summary}>
+  <a href="/" class={css({ fontSize: 'sm' })}>&larr; All records</a>
+  <h1 class={css({ fontSize: '3xl', fontWeight: 'bold' })}>{data.name}</h1>
+  <p class={css({ color: 'gray.600' })}>
+    {data.category} &middot; As of <time datetime={updated}>{updated}</time>
+  </p>
+  <p>{data.summary}</p>
+  {
+    data.tags.length > 0 && (
+      <ul class={css({ display: 'flex', flexWrap: 'wrap', gap: '2' })}>
+        {data.tags.map((tag) => (
+          <li class={css({ px: '2', py: '0.5', bg: 'gray.100', rounded: 'sm', fontSize: 'sm' })}>{tag}</li>
+        ))}
+      </ul>
+    )
+  }
+  {
+    data.source && (
+      <p class={css({ fontSize: 'sm' })}>
+        Source: <a href={data.source} rel="noopener noreferrer" class={link}>{new URL(data.source).hostname}</a>
+      </p>
+    )
+  }
+</Base>

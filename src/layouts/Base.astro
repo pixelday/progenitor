@@ -1,0 +1,90 @@
+---
+import '../styles/global.css';
+import { css } from 'styled-system/css';
+import { site } from '../site';
+
+interface Props {
+  /** Page title. The site name is appended. Omit it on the home page. */
+  title?: string;
+  description?: string;
+  /** Only the 404 page sets this: it is never indexed and never gets a canonical. */
+  noindex?: boolean;
+}
+
+const { title, description = site.description, noindex = false } = Astro.props;
+const fullTitle = title ? `${title} · ${site.name}` : site.name;
+
+// Launch switch: exactly one of "noindex" or a canonical URL on every page.
+const indexable = site.launched && !noindex;
+// Absolute URL built from config (Astro.site), never from the request.
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+
+// The commit this build came from. Workers Builds sets the variable at build time;
+// a local build says "local". scripts/verify-live.sh reads it to prove which deploy is live.
+const marker = process.env.WORKERS_CI_COMMIT_SHA ?? 'local';
+
+const link = css({ textDecoration: 'underline', _hover: { textDecoration: 'none' } });
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {
+      indexable ? (
+        <link rel="canonical" href={canonical} />
+      ) : (
+        <meta name="robots" content="noindex, nofollow" />
+      )
+    }
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="site-marker" content={marker} />
+  </head>
+  <body class={css({ color: 'gray.900', bg: 'white', lineHeight: '1.5' })}>
+    <!-- Base UI popups portal into this isolated stacking context (see panda.config.ts). -->
+    <div class="root">
+      <a
+        href="#main"
+        class={css({
+          position: 'absolute',
+          left: '2',
+          top: '-20',
+          px: '3',
+          py: '2',
+          bg: 'white',
+          borderWidth: '1px',
+          borderColor: 'gray.900',
+          _focusVisible: { top: '2' },
+        })}
+      >
+        Skip to content
+      </a>
+      <header class={css({ maxW: '5xl', mx: 'auto', px: '6', pt: '6' })}>
+        <a href="/" class={css({ fontWeight: 'semibold' })}>{site.name}</a>
+      </header>
+      <main id="main" class={css({ maxW: '5xl', mx: 'auto', p: '6', display: 'grid', gap: '6' })}>
+        <slot />
+      </main>
+      <footer
+        class={css({
+          maxW: '5xl',
+          mx: 'auto',
+          px: '6',
+          py: '8',
+          fontSize: 'sm',
+          color: 'gray.600',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '4',
+        })}
+      >
+        <span>&copy; {new Date().getFullYear()} {site.name}</span>
+        <a href="/privacy/" class={link}>Privacy</a>
+        <a href="/terms/" class={link}>Terms</a>
+      </footer>
+    </div>
+  </body>
+</html>

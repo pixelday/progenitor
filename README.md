@@ -1,1 +1,117 @@
-# progenitor
+# Static site starter
+
+A website that builds to plain HTML, CSS and JS and is served from Cloudflare's edge. There is
+no server, no database and no runtime data fetching. Records live in a YAML file and are
+rendered at build time. A merge to `main` on GitHub is the only way anything deploys.
+
+Stack: Astro (static output only), React + TypeScript for interactive islands, PandaCSS,
+Base UI, Cloudflare Workers static assets (free plan), one private GitHub repo (free plan).
+
+Start here. Everything a new session needs is in this file, `docs/project.md` and
+`docs/setup/`. `docs/stack-wiring.md` explains the config. `docs/archive/` is background from
+before the starter had code: where it disagrees with the files above, they win.
+
+## Prerequisites (as of 2026-11-25)
+
+For the spike:
+
+- **Node 24.22.3** and the npm that ships with it (11.x). `.nvmrc` pins it. An older Node is
+  refused: `npm ci` stops with `EBADENGINE`.
+- **git**
+- **A GitHub account** (free), with two-factor authentication on
+- **A Cloudflare account** (free), with two-factor authentication on
+
+For launch only:
+
+- **A domain** whose DNS is on Cloudflare
+
+Optional:
+
+- **Claude Code**, **Codex** or **Gemini**. `AGENTS.md` holds the rules they follow.
+
+## The path
+
+Fill in `docs/project.md` first. Then:
+
+| Step | File | Who |
+|---|---|---|
+| 1. Build and preview locally | [docs/setup/1-local.md](docs/setup/1-local.md) | a session, or you |
+| 2. Configure GitHub | [docs/setup/2-github.md](docs/setup/2-github.md) | you, in the browser |
+| 3. Deploy to a `workers.dev` hostname | [docs/setup/3-cloudflare.md](docs/setup/3-cloudflare.md) | you, in the browser; a session verifies |
+| 4. Launch on a domain | [docs/setup/4-launch.md](docs/setup/4-launch.md) | you; a session verifies |
+
+**The spike is done** at the end of step 3, when this prints only `PASS`:
+
+```bash
+bash scripts/verify-live.sh <worker-name>.<subdomain>.workers.dev "$(git rev-parse main)" preview
+```
+
+"You" means the owner. A session can't click a dashboard, and `AGENTS.md` forbids it from
+pushing, so the owner does every push, merge and dashboard step.
+
+## What has been proven
+
+Each claim in `docs/setup/` carries one of these tags.
+
+| Tag | Meaning |
+|---|---|
+| **LOCAL** | Run against this starter on 2026-11-25: macOS, Node 24.22.3, the versions in `package.json`. |
+| **LIVE** | Observed on live Cloudflare sites in earlier work, on a different build stack (Jekyll on Cloudflare Pages). |
+| **DOCS** | Read in vendor documentation in November 2026. Not run. |
+| **OPEN** | Not established. The step says how to settle it. |
+
+- **Step 1 is LOCAL throughout.** Install from the lockfile, the full build, the header-faithful
+  preview and the island hydrating under the Content Security Policy in Chrome 158 all ran.
+- **Steps 2 to 4 have never been run with this starter.** Nothing here has been deployed to
+  Cloudflare. Their settings are LIVE or DOCS, and the first deploy settles the OPEN items.
+  When it does, update the step.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `npm ci` | Installs from the lockfile, then generates `styled-system/` (Panda's helpers). |
+| `npm run dev` | Dev server with hot reload. It sends no security headers and no CSP. |
+| `npm run build` | Type check, unit tests, build, then `scripts/verify-dist.mjs`. This is what Cloudflare runs, so a failing check blocks the deploy. |
+| `npm run preview` | Serves `dist/` the way Cloudflare will, with the headers and the real 404. Build first. |
+| `npm test` | Unit tests only. |
+
+There is no `deploy` script on purpose. Deploys come only from Cloudflare building a merge to
+`main`.
+
+## What is where
+
+```
+README.md               this file
+AGENTS.md  CLAUDE.md    rules for agent tools
+docs/project.md         what this site is, and its current status: fill it in
+docs/setup/             the four steps
+docs/stack-wiring.md    how Astro, React, Panda and Base UI are wired together
+docs/archive/           background from before the starter had code: not instructions
+src/site.ts             name, description, canonical URL and the launch switch
+src/data/records.yml    the records: the source of truth for content
+src/content.config.ts   the records' schema; bad data fails the build
+src/pages/              one file per page; records/[id].astro makes a page per record
+src/components/         React islands (the only JavaScript the site ships)
+src/lib/                the data projection and the localStorage store, with its tests
+public/_headers         security headers and cache rules, read by Cloudflare
+astro.config.ts         static output, the Content Security Policy, Panda, the sitemap
+wrangler.jsonc          the Cloudflare Worker: static assets only, no code
+scripts/verify-dist.mjs checks the build; runs inside `npm run build`
+scripts/verify-live.sh  checks a deployed host; run it after every deploy
+```
+
+## Rules that hold
+
+1. **Static output only.** No adapter, no Worker code, no server. If a feature seems to need
+   one, stop and ask the owner.
+2. **No third-party requests.** Fonts, scripts and images are served from this site. An
+   exception is declared in `astro.config.ts` and on the privacy page in the same change.
+3. **The repo is the site.** Headers, redirects, the CSP and the Worker config are files.
+   What can only be set in a dashboard is listed in `docs/setup/`.
+4. **Content lives in data.** Facts go in `src/data/`, each with an as-of date and, where it
+   has one, a source.
+5. **Never weaken a check to make a build pass.** If a check is wrong, fix it in a change that
+   does nothing else and say why.
+
+`docs/archive/technical-brief.md` gives the reasons behind each rule.

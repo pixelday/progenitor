@@ -1,0 +1,14 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    // Import Panda's generated helpers as 'styled-system/css' from any depth.
+    // Astro reads tsconfig paths, so this alias works at build time too.
+    "paths": {
+      "styled-system/*": ["./styled-system/*"]
+    }
+  }
+}

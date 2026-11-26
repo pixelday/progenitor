@@ -1,0 +1,53 @@
+# Source of truth for the "records" collection.
+# Loaded by src/content.config.ts and validated against its schema at build time.
+#
+# YAML rules that matter here:
+# - Quote anything that only looks numeric: versions ("1.10"), codes with leading
+#   zeros ("01234") and ids ("0042"). Unquoted, they become numbers.
+# - Unquoted dates (2026-01-05) become Date objects. The schema accepts either form.
+# - `updated` is the as-of date shown beside the record. `source` must be https.
+
+- id: getting-started
+  name: Getting started guide
+  category: Guide
+  tags: [basics, setup]
+  updated: 2026-10-02
+  summary: A short walkthrough of the core concepts and first steps.
+  source: https://example.com/getting-started
+
+- id: style-reference
+  name: Style reference
+  category: Guide
+  tags: [writing, conventions]
+  updated: 2026-08-14
+  summary: Conventions for naming, tone and formatting.
+
+- id: import-tool
+  name: Import tool
+  category: Tool
+  tags: [data, automation]
+  updated: 2026-11-03
+  summary: Converts spreadsheet exports into clean YAML records.
+  source: https://example.com/import-tool
+
+- id: link-checker
+  name: Link checker
+  category: Tool
+  tags: [quality, automation]
+  updated: 2026-06-21
+  summary: Flags broken internal and external links before a deploy.
+
+- id: annual-survey
+  name: Annual survey results
+  category: Report
+  tags: [data, research]
+  updated: 2026-09-30
+  summary: Headline numbers from this year's survey, with the method.
+  source: https://example.com/annual-survey
+
+- id: release-notes
+  name: Release notes
+  category: Report
+  tags: [changes]
+  updated: "2026-11-18"
+  summary: What changed in the latest release, and what to check afterwards.
