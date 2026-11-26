@@ -63,7 +63,10 @@ Each claim in `docs/setup/` carries one of these tags.
 
 - **Step 1 is LOCAL throughout.** Install from the lockfile, the full build, the header-faithful
   preview and the island hydrating under the Content Security Policy in Chrome 158 all ran.
-- **Steps 2 to 4 have never been run with this starter.** Nothing here has been deployed to
+- **Step 2 has been run only in part.** On 2026-11-26 the starter's own repository was on
+  GitHub, public, with `main` pushed and a ruleset on `main`. The step's other settings are
+  LIVE or DOCS.
+- **Steps 3 and 4 have never been run with this starter.** Nothing here has been deployed to
   Cloudflare. Their settings are LIVE or DOCS, and the first deploy settles the OPEN items.
   When it does, update the step.
 - **No second site has been built from it yet.** Until one has, "copy it and change only the
@@ -157,3 +160,36 @@ fails if a page is built that the sitemap page does not list.
    does nothing else and say why.
 
 `docs/archive/technical-brief.md` gives the reasons behind each rule.
+
+## The starter's own rules
+
+The name describes the relation. A progenitor cell descends from a stem cell: it is more
+committed than its parent and still generic. A site built from this starter descends from it
+in the same way: it begins as a copy and becomes specific through its data and settings.
+
+The rules above hold for every site. These hold for the starter.
+
+1. **It always builds.** `npm run build` passes on the starter as it stands, with nothing but
+   its sample records. A change that breaks that does not merge, because every site made
+   afterwards would start broken.
+2. **Brandless, not styleless.** The starter is styled and carries no brand: the name is
+   "Site name", the address is `example.com` and the icons are a plain blue square. A site
+   should take on a brand by changing design tokens, not by editing components. The token
+   layer that would make that true is not built (`docs/working.md`).
+3. **The real checks from the first build.** A fresh copy passes `npm run build`, which is the
+   only build script and the one the deploy is set to run. There is no relaxed script for a
+   site that is just starting. The checks that apply only to a launched site turn on with
+   `launched` in `src/site.ts`.
+4. **A site's content belongs to the site.** Its records, settings and page text live in its
+   own repository. The starter carries sample data only.
+5. **The legal pages are part of the floor.** The privacy policy, the terms and the
+   accessibility page have the same standing as the favicon, the 404 page and the sitemap:
+   the build fails without them. Whether the accessibility page stays required is open
+   (`docs/working.md`).
+
+The principle behind all five is compliance as architecture: a site's obligations (privacy,
+accessibility, security) are properties of its structure that the build enforces, not a list
+run before launch. The legal pages are that principle extended, not a separate concern.
+
+Nothing yet carries a later change in the starter down to a site already built from it
+(`docs/working.md`).

@@ -1,8 +1,10 @@
 # Step 2. Configure GitHub
 
-As of 2026-11-25. **This step has not been run with this starter.** The values come from a
-live repo in earlier work (LIVE) and from GitHub's documentation (DOCS). The git commands were
-run on a local fixture (LOCAL).
+As of 2026-11-25, except where a later date is given. **This step has been run only in part
+with this starter.** On 2026-11-26 the starter's own repository, which is public, had `main`
+pushed and the ruleset in part 4 set. Everything else comes from a live repo in earlier work
+(LIVE) and from GitHub's documentation (DOCS). The git commands were run on a local fixture
+(LOCAL).
 
 The owner does this step in the browser. Only settings that differ from GitHub's defaults are
 listed. The "default" column is what the background docs recorded; GitHub changes defaults,
@@ -100,6 +102,19 @@ production deploy**. "Every change goes through a pull request" is a convention.
 **If the repository is public**, the limit above does not apply. Add a ruleset for `main`
 that requires a pull request before merging and blocks force pushes, and GitHub enforces
 the convention.
+
+The starter's own repository has one, set on 2026-11-26. It targets the default branch,
+requires a pull request with no approvals, blocks force pushes and restricts deletions. Its
+bypass list is empty: that was seen on the settings page, because the API does not show the
+list to an account with Write access. Read the rules back with:
+
+```bash
+gh api repos/OWNER/REPO/rules/branches/main --jq '[.[].type] | sort | join(", ")'
+# expect: deletion, non_fast_forward, pull_request
+```
+
+`non_fast_forward` is the API's name for "Block force pushes". On a public repository this
+read needs no Admin access. It also answered a request with no credentials.
 
 ## 5. The Cloudflare GitHub App
 
