@@ -7,12 +7,14 @@
 set -uo pipefail
 D=${1:?host}; SHA=${2:?expected commit sha}; MODE=${3:-prod}
 H='Accept: text/html,application/xhtml+xml'   # browser-shaped: bare curl misses edge injection
+N='Sec-Fetch-Mode: navigate'                  # a page load, as a browser sends it: without this a
+                                              # branch preview answers an unknown path "Not found"
 bad=0
 check() { local name=$1; shift; if "$@"; then echo "PASS  $name"; else echo "FAIL  $name"; bad=1; fi; }
 has()   { grep -qiE -- "$1" <<<"$2"; }        # here-strings, not pipes: no SIGPIPE races
 lacks() { ! has "$1" "$2"; }
 eq()    { [ "$1" = "$2" ]; }
-get()   { curl -sS --max-time 15 -A 'verify-live' -H "$H" "$@"; }
+get()   { curl -sS --max-time 15 -A 'verify-live' -H "$H" -H "$N" "$@"; }
 code()  { get -o /dev/null -w '%{http_code}' "$1"; }
 dest()  { get -o /dev/null -w '%{redirect_url}' "$1"; }
 ctype() { get -o /dev/null -w '%{content_type}' "$1"; }
