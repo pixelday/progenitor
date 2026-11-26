@@ -66,8 +66,8 @@ The owner does these. A session can verify each one.
 - **The React island.** The home page ships 83.4 KB of gzipped JavaScript for a search box and
   three toggles, and about 67 KB of that is React. The assessment in `docs/archive/`
   recommends plain HTML and a small script for a control this simple.
-- **The archive's future.** If `docs/archive/` goes, eight lines point into it. Find them with
-  `git grep -n 'docs/archive' -- . ':!docs/archive'`.
+- **The archive's future.** If `docs/archive/` goes, eight lines outside this file point into
+  it. Find them with `git grep -n 'docs/archive' -- . ':!docs/archive' ':!docs/working.md'`.
 - **Whether the accessibility page is mandatory.** Today it is: the build fails without
   `/accessibility/`, a launched build refuses its starter text, and `scripts/verify-live.sh`
   expects it to answer 200. Decide whether every site must publish one. This is for later:
