@@ -109,10 +109,10 @@ The owner does these. A session can verify each one.
 - **Fingerprint all six assets.** `scripts/verify-dist.mjs` refuses a launched site that still
   ships the starter's `favicon.svg`, `favicon.ico` or share image. `apple-touch-icon.png`,
   `icon-192.png` and `icon-512.png` are not on that list.
-- **The other user preferences.** The page follows the system's light or dark preference.
-  A light, dark or system choice on the page is not built, and nothing handles
-  `prefers-contrast`, `forced-colors` or print. `prefers-reduced-motion` has nothing to act
-  on, because nothing animates.
+- **The other user preferences.** The page follows the system's light or dark preference,
+  and the Theme select in the header overrides it. Nothing handles `prefers-contrast`,
+  `forced-colors` or print. `prefers-reduced-motion` has nothing to act on, because nothing
+  animates.
 - **Check records while they are edited.** `astro build` writes
   `.astro/collections/records.schema.json` from the Zod schema. A first line of
   `# yaml-language-server: $schema=../../.astro/collections/records.schema.json` in

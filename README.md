@@ -114,7 +114,8 @@ src/content.config.ts   the records' schema; bad data fails the build
 src/pages/              one file per page; records/[id].astro makes a page per record;
                         the .ts files write robots.txt, sitemap.xml, llms.txt and the manifest
 src/layouts/Base.astro  the one <head>: icons, share card, structured data, canonical
-src/components/         React islands (the only JavaScript the site ships), JSON-LD, prose
+src/components/         React islands, JSON-LD, prose, and the component that inlines the theme script
+src/scripts/theme.js    the light, dark or system choice: the one script on every page
 src/lib/                the data projection and the localStorage store, with their tests
 public/                 _headers (security headers, cache rules), the icons, the share card
 astro.config.ts         static output, the Content Security Policy, Panda

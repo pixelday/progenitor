@@ -233,6 +233,7 @@ const cases = [
   { name: 'a second page loads a script file', base: 'site', fails: ['jsPages'], tamper: (d) => inHead(d, T, `<script type="module" src="${scriptOf(d)}"></script>`) },
   { name: 'a second page carries an island', base: 'site', fails: ['jsPages'], tamper: (d) => inMain(d, T, '<astro-island></astro-island>') },
   { name: 'a second page carries an inline script', base: 'site', fails: ['jsPages', 'csp'], tamper: (d) => inHead(d, T, '<script>document.title="x"</script>') },
+  { name: 'the theme script is changed on one page', base: 'site', fails: ['jsPages', 'csp'], tamper: (d) => edit(d, T, "const KEY = 'site:theme';", "const KEY = 'site:other';") },
   { name: 'JavaScript is over budget', base: 'site', fails: ['jsBudget'], tamper: (d) => writeFileSync(dist(d, '_astro/pad.js'), incompressible(100)) },
   { name: 'CSS is over budget', base: 'site', fails: ['cssBudget'], tamper: (d) => writeFileSync(dist(d, '_astro/pad.css'), incompressible(100)) },
   { name: 'a page is over budget', base: 'site', fails: ['pageBudget'], tamper: (d) => inMain(d, T, `<!-- ${incompressible(100).toString('hex')} -->`) },

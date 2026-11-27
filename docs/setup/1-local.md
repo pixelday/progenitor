@@ -79,7 +79,7 @@ alone: it builds two copies of the site in a temporary folder, one as it stands 
 launched with test values, then breaks a copy of one of them for each case and runs
 `verify-dist` there. A case passes when exactly the checks it should trip print `FAIL`.
 Expect two controls, one coverage line and a `PASS` line for each case, ending with
-`tamper-test: 83 breaks, every one caught`.
+`tamper-test: 84 breaks, every one caught`.
 
 - A check added to `verify-dist` without a case fails the run, and so does a check that stops
   catching its case. A change to `verify-dist` therefore comes with its case.
@@ -124,8 +124,11 @@ Open the preview address with the browser console open.
 
 - The category buttons and the search box filter the list. "Reset filters" clears them.
 - The console shows no Content Security Policy message.
-- Pick a category and reload: it is still picked. That choice is the only thing stored, under
-  the localStorage key `site:v1`.
+- Pick a category and reload: it is still picked. It is stored under the localStorage key
+  `site:v1`.
+- Pick Dark, or Light, under Theme in the header, then open another page: the choice holds,
+  stored under `site:theme`. Picking System removes the key. These two keys are the only
+  things the site stores.
 
 Run on 2026-11-25 in headless Chrome 158: the island hydrated with no CSP message. A control
 with `script-src 'self'` added to the header in `public/_headers` did not hydrate and logged

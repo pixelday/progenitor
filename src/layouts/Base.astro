@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { css } from 'styled-system/css';
 import JsonLd from '../components/JsonLd.astro';
+import ThemeScript from '../components/ThemeScript.astro';
 import { absolute, legalPages, pages } from '../lib/pages';
 import { site } from '../site';
 
@@ -29,6 +30,7 @@ const canonical = absolute(Astro.url.pathname);
 const marker = process.env.WORKERS_CI_COMMIT_SHA ?? 'local';
 
 const link = css({ textDecoration: 'underline', _hover: { textDecoration: 'none' } });
+const focusRing = { outline: '2px solid', outlineColor: 'focusRing', outlineOffset: '2px' };
 ---
 
 <!doctype html>
@@ -40,11 +42,14 @@ const link = css({ textDecoration: 'underline', _hover: { textDecoration: 'none'
     <meta name="description" content={description} />
     {indexable ? <link rel="canonical" href={canonical} /> : <meta name="robots" content="noindex, nofollow" />}
     <meta name="format-detection" content="telephone=no" />
-    {/* The page follows the operating system's light or dark preference (panda.config.ts).
-        Saying so here lets the browser paint the right background before the CSS arrives. */}
+    {/* The page follows the operating system's light or dark preference (panda.config.ts),
+        unless the visitor picks one in the header. Saying so here lets the browser paint the
+        right background before the CSS arrives. The theme script reads the two theme colors,
+        so it comes after them. */}
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content={site.themeColor.light} />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content={site.themeColor.dark} />
+    <ThemeScript />
 
     {/* Icons. The files live in public/, and verify-dist checks their type and size.
         sizes="32x32" on the ICO makes browsers that can use the SVG prefer it. */}
@@ -93,8 +98,44 @@ const link = css({ textDecoration: 'underline', _hover: { textDecoration: 'none'
       >
         Skip to content
       </a>
-      <header class={css({ maxW: '5xl', mx: 'auto', px: '6', pt: '6' })}>
+      <header
+        class={css({
+          maxW: '5xl',
+          mx: 'auto',
+          px: '6',
+          pt: '6',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '4',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        })}
+      >
         <a href="/" class={css({ fontWeight: 'semibold' })}>{site.name}</a>
+        {/* The light, dark or system choice (src/scripts/theme.js). Hidden until that script
+            runs: without JavaScript the control could do nothing, and the page follows the
+            system. */}
+        <label hidden class={css({ display: 'flex', gap: '2', alignItems: 'center', fontSize: 'sm' })}>
+          Theme
+          <select
+            id="theme"
+            class={css({
+              px: '2',
+              py: '1',
+              bg: 'bg',
+              color: 'fg',
+              borderWidth: '1px',
+              borderColor: 'border.control',
+              rounded: 'md',
+              cursor: 'pointer',
+              _focusVisible: focusRing,
+            })}
+          >
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
       </header>
       <main id="main" class={css({ maxW: '5xl', mx: 'auto', p: '6', display: 'grid', gap: '6' })}>
         <slot />

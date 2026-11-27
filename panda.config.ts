@@ -22,8 +22,11 @@ export default defineConfig({
     // <style> in <body>; astro.config.ts removes that element, so the rule lives here.
     'astro-island, astro-slot, astro-static-slot': { display: 'contents' },
     // The color scheme. Every color token below is light-dark(<light>, <dark>), and this
-    // property picks the half: "light dark" follows the operating system.
+    // property picks the half: "light dark" follows the operating system. A visitor's choice
+    // in the header sets data-theme on <html> (src/scripts/theme.js), which overrides it.
     html: { colorScheme: 'light dark' },
+    'html[data-theme="light"]': { colorScheme: 'light' },
+    'html[data-theme="dark"]': { colorScheme: 'dark' },
   },
 
   theme: {

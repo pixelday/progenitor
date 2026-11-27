@@ -60,7 +60,7 @@ export const site: Site = {
   shareImage: { path: '/social.png', alt: 'Describe the share image here.' },
   publisher: null,
   contact: null,
-  legalUpdated: '2026-11-25',
+  legalUpdated: '2026-11-26',
   launched: false,
   aiCrawlers: 'allow',
 };

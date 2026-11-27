@@ -150,7 +150,11 @@ Measured from `dist/_astro` on 2026-11-26, gzipped at level 9 as `verify-dist` c
 | The island with Base UI Input and ToggleGroup | 16.1 KB |
 | All CSS | 6.8 KB |
 
-Only the home page loads any of the JavaScript. A page with no island ships none.
+Only the home page loads any of these files. Every page also carries the theme script,
+`src/scripts/theme.js`, inline in its `<head>`: 1.5 KB, 0.7 KB gzipped, counted in each page's
+size and not in the JS budget. It sets `data-theme` on `<html>` before the page paints and
+wires up the Theme select in the header. Without JavaScript the select stays hidden and the
+page follows the system.
 
 - Hydrate with `client:visible` by default, `client:idle` above the fold when it is not
   needed in the first second, and `client:load` only when it is used at once. The starter's
