@@ -37,6 +37,7 @@ In `wrangler.jsonc`, set `name` and `compatibility_date` (step 1). The file as s
 
 | Key | Value | Why |
 |---|---|---|
+| `$schema` | `./node_modules/wrangler/config-schema.json` | Lets an editor check the file against the installed Wrangler. |
 | `name` | the Worker's name | Must equal the name given in the dashboard, or the build fails. It appears in the public hostname, so keep it neutral. |
 | `main` | absent | An assets-only Worker has no code. Its absence is what keeps the site static. |
 | `assets.directory` | `./dist` | Astro's output. |
@@ -120,7 +121,7 @@ from the starter's production build of 2026-11-26 (DEPLOYED).
 2. **The install used the lockfile:** `Installing project dependencies: npm clean-install
    --progress=false`. `panda codegen` ran after it (the `prepare` script) and wrote
    `styled-system`. Without it, `astro check` fails on every `styled-system/...` import.
-3. **`npm run build` printed fifteen `PASS` lines**, then `verify-dist: 12 pages checked, all
+3. **`npm run build` printed eighteen `PASS` lines**, then `verify-dist: 12 pages checked, all
    passed`.
 4. **The deploy step uploaded the assets** and printed the hostname. It lists only new or
    modified assets, so a file that did not change is not on the list. Every HTML page is on

@@ -4,6 +4,9 @@
 # YAML rules that matter here:
 # - Quote anything that only looks numeric: versions ("1.10"), codes with leading
 #   zeros ("01234") and ids ("0042"). Unquoted, they become numbers.
+# - 0x1F and 0o17 are numbers too (31 and 15). Quote them if they are text.
+# - A key with no value, or ~, is null, and a field declared .optional() rejects
+#   null. Leave the key out instead, or declare the field .nullable().
 # - Unquoted dates (2026-01-05) become Date objects. The schema accepts either form.
 # - `updated` is the as-of date shown beside the record. `source` must be https.
 

@@ -18,6 +18,10 @@ From a fresh clone, on Node 24.22.3, all of this ran on 2026-11-26:
 The development machine now has Node 24.22.3: `npm ci` and `npm run build` printed the same
 fifteen lines there.
 
+Later that day three checks were added: total CSS, the largest page and the host's file
+limits. `npm run build` now prints eighteen `PASS` lines, and each new check printed `FAIL` on
+a build tampered to break it.
+
 The starter is on `main` of its public GitHub repository, behind a ruleset that requires a
 pull request and blocks force pushes (`docs/setup/2-github.md`, part 4). It is deployed as a
 Worker on a `workers.dev` hostname, unlaunched and `noindex`, and a merge to `main` builds
@@ -63,6 +67,10 @@ The owner does these. A session can verify each one.
 - **The React island.** The home page ships 83.4 KB of gzipped JavaScript for a search box and
   three toggles, and about 67 KB of that is React. The assessment in `docs/archive/`
   recommends plain HTML and a small script for a control this simple.
+- **The React Compiler.** The starter runs `react()` without it, and nothing records why. The
+  assessment in `docs/archive/` says to keep it on. It is `react({ compiler: true })` in
+  `astro.config.ts` plus `oxc-transform-react` as a dev dependency. Expect no saving in size:
+  measure the JS budget before and after.
 - **The archive's future.** If `docs/archive/` goes, eight lines outside this file point into
   it. Find them with `git grep -n 'docs/archive' -- . ':!docs/archive' ':!docs/working.md'`.
 - **Whether the accessibility page is mandatory.** Today it is: the build fails without
@@ -92,6 +100,12 @@ The owner does these. A session can verify each one.
   `prefers-color-scheme`, `prefers-contrast` or `forced-colors`. `prefers-reduced-motion` has
   nothing to act on, because nothing animates. `npm run audit` already loads every page in
   dark mode, so it will test a dark scheme as soon as there is one.
+- **Check records while they are edited.** `astro build` writes
+  `.astro/collections/records.schema.json` from the Zod schema. A first line of
+  `# yaml-language-server: $schema=../../.astro/collections/records.schema.json` in
+  `src/data/records.yml` would let an editor with a YAML extension flag a bad record before any
+  build. Try it in VS Code first: the generated schema types `updated` as `date-time`, so a
+  date such as `2026-10-02` may be flagged.
 - **A second site.** Build one from the starter by changing only data and settings. Until
   then, that claim is a design goal.
 - **The AI-crawler list.** `src/pages/robots.txt.ts` names five agents as of 2026-11-25. The

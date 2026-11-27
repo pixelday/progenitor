@@ -1,4 +1,6 @@
 {
+  // Lets an editor check this file against the installed Wrangler's own schema.
+  "$schema": "./node_modules/wrangler/config-schema.json",
   // Must equal the Worker's name in the Cloudflare dashboard. It appears in the public
   // workers.dev hostname, so treat it as permanent.
   "name": "progenitor",

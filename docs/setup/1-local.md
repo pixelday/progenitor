@@ -46,7 +46,7 @@ node scripts/verify-dist.mjs`. Expect, in order:
 Tests  12 passed (12)                       (vitest)
 [build] 12 page(s) built                    (astro build)
                                             (html-validate prints nothing when it passes)
-PASS  required files exist                  (verify-dist: fifteen PASS lines)
+PASS  required files exist                  (verify-dist: eighteen PASS lines)
 ...
 verify-dist: 12 pages checked, all passed
 ```
@@ -69,6 +69,8 @@ What `scripts/verify-dist.mjs` refuses to pass:
 | `robots.txt` blocks every crawler | A blocked page can't show its `noindex`. |
 | A launched site still says `example.com` or "Site name", carries starter text, or ships the starter's icons, share image or share image alt text | Stops a launch with placeholders. |
 | A page other than the home page loads JavaScript, or total JS passes 90 KB gzipped | The budget was set from the first measurement, 83.4 KB. |
+| Total CSS passes 15 KB gzipped, or any one page passes 50 KB | The home page holds every record twice, as HTML and as the island's props, so it grows fastest with the data. |
+| More than 20,000 files, or one over 25 MiB | Cloudflare's limits for static assets on the free plan. A build past either passes here and fails at the deploy. |
 | An internal link, asset or `#fragment` points at nothing; a page link lacks its trailing slash | The host answers a slashless page path with a temporary redirect. |
 | `localhost` or `TODO` in built HTML; `set:html` in `src/` outside `src/components/JsonLd.astro` | Residue, and data rendered as raw HTML. |
 

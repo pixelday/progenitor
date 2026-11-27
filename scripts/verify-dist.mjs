@@ -57,6 +57,18 @@ const PAGES_WITH_JS = ['index.html'];
 // lives on one page today; move to per-page budgets when that changes.
 const JS_BUDGET_KB = 90;
 
+// Gzipped size of all CSS in dist/_astro, and of the largest single page. Measured at 6.8 KB
+// and 4.3 KB (index.html) on 2026-11-26. The home page holds every record twice, as HTML and
+// as the island's props, so it grows fastest with the data. Past its budget, split the list
+// into pages.
+const CSS_BUDGET_KB = 15;
+const PAGE_BUDGET_KB = 50;
+
+// Workers Static Assets on the free plan takes at most 20,000 files per version and 25 MiB
+// per file. A build past either would pass every other check and fail at the deploy.
+const MAX_FILES = 20000;
+const MAX_FILE_MIB = 25;
+
 // The one file allowed to render a raw string (structured data, with "<" escaped).
 const SET_HTML_ALLOWED = ['src/components/JsonLd.astro'];
 
@@ -313,8 +325,8 @@ const blocksAll = robots
   .some((group) => /^user-agent:\s*\*\s*$/im.test(group) && /^disallow:\s*\/\s*$/im.test(group));
 check('robots.txt never blocks everything', blocksAll ? ['"Disallow: /" applies to every crawler'] : []);
 
-// 11. JavaScript: only the listed pages load any, and the total stays inside the budget.
-//     A structured-data block is data, not script.
+// 11. Weight: only the listed pages load JavaScript, and the JavaScript, the CSS and the
+//     largest page each stay inside a budget. A structured-data block is data, not script.
 const loadsJs = (html) =>
   /<script[\s>]|<astro-island[\s>]/i.test(html.replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, ''));
 check(
@@ -326,6 +338,18 @@ const jsKB =
     .filter((path) => rel(path).startsWith('_astro/') && path.endsWith('.js'))
     .reduce((total, path) => total + gzipSync(readFileSync(path), { level: 9 }).length, 0) / 1024;
 check(`JS is ${jsKB.toFixed(1)} KB gzipped (budget ${JS_BUDGET_KB} KB)`, jsKB <= JS_BUDGET_KB ? [] : ['over budget']);
+const cssKB =
+  files
+    .filter((path) => rel(path).startsWith('_astro/') && path.endsWith('.css'))
+    .reduce((total, path) => total + gzipSync(readFileSync(path), { level: 9 }).length, 0) / 1024;
+check(`CSS is ${cssKB.toFixed(1)} KB gzipped (budget ${CSS_BUDGET_KB} KB)`, cssKB <= CSS_BUDGET_KB ? [] : ['over budget']);
+const [largest = { name: 'none', kb: 0 }] = pages
+  .map(({ name, html }) => ({ name, kb: gzipSync(html, { level: 9 }).length / 1024 }))
+  .sort((a, b) => b.kb - a.kb);
+check(
+  `the largest page, ${largest.name}, is ${largest.kb.toFixed(1)} KB gzipped (budget ${PAGE_BUDGET_KB} KB)`,
+  largest.kb <= PAGE_BUDGET_KB ? [] : ['over budget: split the record list into pages'],
+);
 
 // 12. Internal links, assets and #fragments point at something that exists. Links to pages use
 //     the trailing-slash form, which the host serves without a redirect.
@@ -370,6 +394,17 @@ check(
     .map((path) => path.split(sep).join('/'))
     .filter((path) => /\.(astro|tsx?|jsx?|mdx?)$/.test(path) && !SET_HTML_ALLOWED.includes(path))
     .filter((path) => /set:html|dangerouslySetInnerHTML/.test(readFileSync(path, 'utf8'))),
+);
+
+// 15. The host's limits on what one deploy may upload.
+check(
+  `${files.length} files (limit ${MAX_FILES}), none over ${MAX_FILE_MIB} MiB`,
+  [
+    ...(files.length > MAX_FILES ? [`${files.length} files is over the limit of ${MAX_FILES}`] : []),
+    ...files
+      .filter((path) => statSync(path).size > MAX_FILE_MIB * 1024 * 1024)
+      .map((path) => `${rel(path)} is ${(statSync(path).size / 1024 / 1024).toFixed(1)} MiB`),
+  ],
 );
 
 console.log(failed ? '\nverify-dist: FAILED' : `\nverify-dist: ${pages.length} pages checked, all passed`);

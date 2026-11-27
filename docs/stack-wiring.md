@@ -58,6 +58,13 @@ installed package or the current docs before trusting a remembered API.
   ships Panda's small runtime. `pandacss({ transform: true })` rewrites static calls into
   class strings instead; it is young and not enabled here. Measure the island's size with and
   without it before adopting it. (RESEARCH)
+- **`css()` sees only values written in the file.** Panda reads the source at build time. A
+  literal, or a choice between literals (`open ? '0' : '2'`), produces CSS. A value known only
+  when the code runs, such as a prop in `css({ width: size })`, produces none: the build prints
+  a `panda_call_unextractable` warning and passes. Write each value as a literal and choose
+  between them with a `cva` variant or a condition on a `data-*` attribute. Panda's usual
+  answer, a CSS variable set with `style={{ '--size': size }}`, puts a `style=""` attribute in
+  the built HTML, which the CSP rules out (below). (LOCAL)
 - **`strictTokens`** catches token typos but also rejects plain values such as `'2px solid'`.
   Leave it off until there is a real token set. (RESEARCH)
 

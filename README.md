@@ -12,6 +12,8 @@ Start here. Everything a new session needs is in this file, `docs/index.md` and
 `docs/setup/`. `docs/stack-wiring.md` explains the config. `docs/archive/` is background from
 before the starter had code: where it disagrees with the files above, they win.
 
+## [Live Demo](https://progenitor.pixelday.workers.dev/)
+
 ## Prerequisites (as of 2026-11-25)
 
 For the spike:
