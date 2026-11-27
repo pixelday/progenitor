@@ -1,7 +1,8 @@
 # <site name or domain>
 
 > Starter template. Replace each `<...>` placeholder, then delete this note. This file is the
-> project map: `AGENTS.md` sends every agent session here first.
+> project map: `AGENTS.md` sends every agent session here first. In the starter itself it
+> stays a template, and the starter's own status and open items are in `docs/working.md`.
 
 <What the site is, who it is for, and the one thing a visitor should do or learn.>
 

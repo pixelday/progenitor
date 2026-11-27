@@ -9,8 +9,28 @@ Stack: Astro (static output only), React + TypeScript for interactive islands, P
 Base UI, Cloudflare Workers static assets (free plan), one private GitHub repo (free plan).
 
 Start here. Everything a new session needs is in this file, `docs/index.md` and
-`docs/setup/`. `docs/stack-wiring.md` explains the config. `docs/archive/` is background from
-before the starter had code: where it disagrees with the files above, they win.
+`docs/setup/`. `docs/architecture.md` explains the design and `docs/stack-wiring.md` the
+config. `docs/archive/` is background and research: where it disagrees with the files above,
+they win.
+
+## The design in a paragraph
+
+Progenitor treats a small website as a pure function of one repository: plain-text data and
+settings go in, a static bundle comes out, a CDN serves it, and nothing runs when a page is
+requested. Every obligation the site has (privacy, accessibility, security, valid markup,
+legal pages, findability) is meant to be a property of that structure, not a checklist run
+before launch. Each decision has one home, every surface derives from it, and a build that
+can't prove the result fails, with the checker itself tested by breaking builds on purpose.
+The standing preference is to remove what would otherwise need managing (a server, a
+database, third-party code, a deploy token, an operator's login) and to replace anything a
+person must remember with a guard. A site begins as a brandless copy that always builds and
+already passes the real checks. It becomes specific through data, settings and tokens, never
+code, and it belongs wholly to its owner, who can take the files and leave. The repository
+is written to be read cold by a person or a model: a short map, dated evidence, and claims
+tagged by how far they were tested.
+
+[docs/architecture.md](docs/architecture.md) is the long form: the principles, the design
+choices that follow from them and the tests to apply when a new decision comes up.
 
 ## [Live Demo](https://progenitor.pixelday.workers.dev/)
 
@@ -67,13 +87,14 @@ Each claim in `docs/setup/` carries one of these tags.
 - **Step 1 is LOCAL throughout.** Install from the lockfile, the full build, the header-faithful
   preview and the island hydrating under the Content Security Policy in Chrome 158 all ran.
 - **Step 2 has been run only in part.** On 2026-11-26 the starter's own repository was on
-  GitHub, public, with `main` pushed and a ruleset on `main`. The step's other settings are
-  LIVE or DOCS.
+  GitHub, public, with `main` pushed, a ruleset on `main`, and the merge, branch and wiki
+  settings of part 3 read back as the step sets them. The step's other settings are LIVE or
+  DOCS.
 - **Step 3 has been run, and its live check passes.** On 2026-11-26 the Worker was created,
-  a merge to `main` built and deployed it, and `scripts/verify-live.sh` printed 36 `PASS`
-  lines against the `workers.dev` hostname. `npm run audit` printed thirteen `PASS` lines
-  against the same host. A branch preview passed both at its own address before its merge
-  (`docs/setup/3-cloudflare.md`, part 6).
+  a merge to `main` built and deployed it, and `scripts/verify-live.sh` printed only `PASS`
+  against the `workers.dev` hostname. So did `npm run audit` against the same host. A branch
+  preview passed both at its own address before its merge (`docs/setup/3-cloudflare.md`,
+  part 6).
 - **Step 4 has never been run with this starter.** Its settings are LIVE or DOCS.
 - **No second site has been built from it yet.** Until one has, "copy it and change only the
   data and the settings" is a design goal, not a result.
@@ -104,8 +125,9 @@ README.md               this file
 AGENTS.md  CLAUDE.md    rules for agent tools
 docs/index.md           what this site is, and its current status: fill it in
 docs/setup/             the four steps
+docs/architecture.md    why it is built this way: the principles and the tests for a decision
 docs/stack-wiring.md    how Astro, React, Panda and Base UI are wired together
-docs/archive/           background from before the starter had code: not instructions
+docs/archive/           background and research: not instructions
 docs/working.md         open items for developing the starter itself
 src/site.ts             the site's identity and its two switches: launched, AI crawlers
 src/lib/pages.ts        the page registry: every fixed page's path, title and description
@@ -168,7 +190,7 @@ fails if a page is built that the sitemap page does not list.
 5. **Never weaken a check to make a build pass.** If a check is wrong, fix it in a change that
    does nothing else and say why.
 
-`docs/archive/technical-brief.md` gives the reasons behind each rule.
+`docs/architecture.md` gives the reasons behind each rule.
 
 ## The starter's own rules
 

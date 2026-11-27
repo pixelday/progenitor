@@ -269,7 +269,7 @@ The starter sets up none of these.
   beacon is on, so that line changes in the same pull request. Whether Cloudflare injects the
   beacon on a Worker custom domain is OPEN. The fallback is the manual snippet from the Web
   Analytics setup screen, with the same CSP entries.
-- **Path aliases**, such as `/about-us` to `/about/` (DOCS). One per line in
-  `public/_redirects`: `/about-us /about/ 301`. Always write the status code, which otherwise
+- **Path aliases**, such as `/about-us` to `/about` (DOCS). One per line in
+  `public/_redirects`: `/about-us /about 301`. Always write the status code, which otherwise
   defaults to 302. The file matches paths only, never hostnames. Limits: 2,000 static and 100
   dynamic rules, 1,000 characters each.

@@ -43,12 +43,12 @@ node scripts/verify-dist.mjs`. Expect, in order:
 
 ```
 - 0 errors                                  (astro check)
-Tests  12 passed (12)                       (vitest)
-[build] 12 page(s) built                    (astro build)
+Tests  <n> passed (<n>)                     (vitest: the two numbers are equal)
+[build] <n> page(s) built                   (astro build)
                                             (html-validate prints nothing when it passes)
-PASS  required files exist                  (verify-dist: nineteen PASS lines)
+PASS  required files exist                  (verify-dist: every line says PASS)
 ...
-verify-dist: 12 pages checked, all passed
+verify-dist: <n> pages checked, all passed
 ```
 
 `astro build` notes that `/sitemap.xml` and `/llms.txt` were not created. That is the launch
@@ -80,7 +80,7 @@ alone: it builds two copies of the site in a temporary folder, one as it stands 
 launched with test values, then breaks a copy of one of them for each case and runs
 `verify-dist` there. A case passes when exactly the checks it should trip print `FAIL`.
 Expect two controls, one coverage line and a `PASS` line for each case, ending with
-`tamper-test: 87 breaks, every one caught`.
+`tamper-test: <n> breaks, every one caught`.
 
 - A check added to `verify-dist` without a case fails the run, and so does a check that stops
   catching its case. A change to `verify-dist` therefore comes with its case.
@@ -136,7 +136,7 @@ with `script-src 'self'` added to the header in `public/_headers` did not hydrat
 two CSP messages, so a silent failure here is detectable.
 
 `npm run audit` does all of this in Chrome, with the preview running in another terminal. It
-takes about two minutes. Expect 28 `PASS` lines:
+takes about two minutes. Every line must say `PASS`. It checks:
 
 - axe, the console and sideways scrolling on every page in ten color modes: the system's light
   and dark at 1280 and 320 px, Dark chosen on a light system and Light on a dark one, more

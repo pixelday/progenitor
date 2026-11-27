@@ -133,8 +133,8 @@ from the starter's production build of 2026-11-26 (DEPLOYED).
 2. **The install used the lockfile:** `Installing project dependencies: npm clean-install
    --progress=false`. `panda codegen` ran after it (the `prepare` script) and wrote
    `styled-system`. Without it, `astro check` fails on every `styled-system/...` import.
-3. **`npm run build` printed eighteen `PASS` lines**, then `verify-dist: 12 pages checked, all
-   passed`.
+3. **Every `verify-dist` line said `PASS`**, and the last was `verify-dist: 12 pages checked,
+   all passed`.
 4. **The deploy step uploaded the assets** and printed the hostname. It lists only new or
    modified assets, so a file that did not change is not on the list. Every HTML page is on
    it after every commit, because each page carries the commit's marker.
@@ -165,12 +165,12 @@ Every line must say `PASS`. In `preview` mode it checks:
   accessibility and sitemap pages answer 200
 - the host sends `X-Robots-Tag: noindex`
 
-The two cache lines were added later on 2026-11-26. With them the script printed 38 `PASS`
-lines against the production hostname (DEPLOYED).
+The two cache lines were added later on 2026-11-26, and the script still printed only `PASS`
+against the production hostname (DEPLOYED).
 
 The script is copied from `docs/archive/technical-brief.md`, where it was run against public
-hosts. On 2026-11-26, after a merge to `main` had built and deployed, it printed 36 `PASS`
-lines and no `FAIL` against the starter's production hostname (DEPLOYED):
+hosts. On 2026-11-26, after a merge to `main` had built and deployed, it printed only `PASS`
+against the starter's production hostname (DEPLOYED):
 
 | Was open | What the deploy showed |
 |---|---|
@@ -184,13 +184,12 @@ it as "Empty commit message", and two lines of this script failed: the marker li
 404 line, which looks for the same SHA. They passed once a push-started build replaced it.
 
 The status codes and cache headers of step 1, part 4 were the same on the deployed host
-(DEPLOYED): `/terms` answered 307 to `/terms/`, `/sitemap.xml` and `/_headers` answered 404, a
+(DEPLOYED): `/terms/` answered 307 to `/terms`, `/sitemap.xml` and `/_headers` answered 404, a
 file under `/_astro/` was `immutable`, and HTML was `max-age=0, must-revalidate`.
 
 Then check the island on the deployed host. `npm run audit -- https://<host>` does it in
-Chrome. Against the deployed host it printed thirteen `PASS` lines, among them "no console
-message, so no Content Security Policy violation" (DEPLOYED). It printed the same thirteen
-against a branch preview.
+Chrome. Against the deployed host every line said `PASS`, among them "no console message, so
+no Content Security Policy violation" (DEPLOYED). A branch preview gave the same result.
 
 **A branch preview answers an unknown path differently from production** (DEPLOYED):
 
@@ -223,8 +222,8 @@ of the rules in `public/_headers`. So Cloudflare adds `noindex` on previews itse
 
 Every item has been seen on 2026-11-26 (DEPLOYED). A pushed branch started a preview build
 within a minute of the push, and the pull request showed its build check. The preview
-passed `verify-live.sh`: 36 `PASS` lines. A merge started a production build, and the script
-passed against production with the merge commit.
+passed `verify-live.sh`. A merge started a production build, and the script passed against
+production with the merge commit.
 
 Do not wait for a comment from Cloudflare to learn the address. Of the three pull requests
 that built a preview, one got a comment, a table named "Preview Deployments by commit". Its
