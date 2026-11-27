@@ -144,3 +144,24 @@ Only the home page loads any of the JavaScript. A page with no island ships none
 Astro publishes a documentation server for agent tools at `https://mcp.docs.astro.build/mcp`.
 Connecting it gives a session current Astro APIs. (RESEARCH; not connected here. A sandboxed
 session needs that host allowed.)
+
+- **A folder's own instruction files load mid-session.** In Claude Code, a folder's
+  `CLAUDE.md`, `.claude/rules/` and `.claude/skills/` load the first time a session reads a
+  file in that folder. `claudeMdExcludes` in `.claude/settings.json` keeps the instruction
+  files and rules under `untracked/` and `node_modules/` from loading. It does not reach
+  skills, but Claude Code skips a skills folder that `.gitignore` covers, and both trees are
+  gitignored. (LOCAL with Claude Code 2.1.332, for `untracked/`. `node_modules/` uses the same
+  pattern and was not tested separately. That a `cat` counts as a read is RESEARCH.)
+- **Project settings come from the folder a session starts in.** Start sessions at the repo
+  root, or `.claude/settings.json` is not read. (RESEARCH)
+- **No approval prompt guards `untracked/`** (the owner's decision, 2026-11-26). Nothing reads
+  it in the background: searches skip gitignored paths, its instruction files are excluded,
+  and `AGENTS.md` keeps sessions out. If a prompt is ever wanted, an `ask` permission rule
+  prompts in every mode, bypass included. But `cat`, `ls`, `find` and `grep` run without a
+  prompt in every mode, so only a `PreToolUse` hook could gate the shell. The
+  `InstructionsLoaded` hook can only observe a file that has already loaded. (RESEARCH)
+- **To test a guard**, run a headless `claude -p` session with an `InstructionsLoaded` hook
+  that appends each event to a log, plus `--debug-file`. Put the test folder inside the repo
+  and delete it afterwards: Claude Code ignores instruction files and skills inside a
+  session's scratchpad. Started from inside another session, `claude` inherits that session's
+  `CLAUDE_CODE_*` variables, a messaging token among them, so unset them first. (LOCAL)

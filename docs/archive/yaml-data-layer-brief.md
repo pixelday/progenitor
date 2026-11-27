@@ -1,5 +1,11 @@
 # The YAML data layer: how the reference instance is driven by flat files
 
+> **Status (2026-11-26): background, not instructions.** Design input for the starter's data
+> layer, not a task: nothing in it has been ruled on. In this starter the instructions
+> are `README.md` and `docs/setup/`, and where this brief disagrees with them, they win. The
+> reference copy it cites is not in this repository. Read it for the model (§1), pages as data
+> (§6), the switches (§7), what not to copy (§10) and the YAML parser traps (§11).
+
 This brief is for the session building the Astro starter. It explains how the reference
 instance is driven from flat YAML files committed to its repository. The reference instance is
 a production Jekyll site on Cloudflare, and you have a sandbox copy of it. The brief covers

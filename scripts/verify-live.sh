@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# verify-live.sh <host> <expected-commit-sha> [prod|preview]
+# verify-live.sh <host> <expected-commit-sha> [prod|preview] [workers.dev-host]
 #   prod (default): <host> is the production domain. Every check, including www, http and DNS.
+#            Also give the Worker's workers.dev hostname: it must no longer serve the site.
 #   preview: <host> is a workers.dev hostname (a PR Preview or the production alias).
-#            Page, icon and legal-page checks only, and the host must send noindex.
+#            Page, cache, icon and legal-page checks only, and the host must send noindex.
 # Prints PASS/FAIL per check; exits 1 if any check failed.
 set -uo pipefail
 D=${1:?host}; SHA=${2:?expected commit sha}; MODE=${3:-prod}
+[ "$MODE" = preview ] || WD=${4:?workers.dev hostname, needed in prod mode}
 H='Accept: text/html,application/xhtml+xml'   # browser-shaped: bare curl misses edge injection
 N='Sec-Fetch-Mode: navigate'                  # a page load, as a browser sends it: without this a
                                               # branch preview answers an unknown path "Not found"
@@ -43,6 +45,10 @@ check "no Set-Cookie (404)"          lacks '^set-cookie:' "$MH"
 check "no edge injection"            lacks 'cloudflareinsights|__cf_email__|rocket-loader' "$PB"
 check "CSP meta (page)"              has "<meta[^>]*http-equiv=[\"']?content-security-policy" "$PB"
 check "CSP meta (404)"               has "<meta[^>]*http-equiv=[\"']?content-security-policy" "$MB"
+# Cache: a zone's Browser Cache TTL can raise max-age=0 to hours, so visitors keep stale pages.
+ASSET=$(grep -oE '/_astro/[^"]+\.css' <<<"$PB" | head -n1)
+check "HTML is max-age=0, revalidated" has '^cache-control:.*max-age=0.*must-revalidate' "$PH"
+check "/_astro/ file is immutable"   has '^cache-control:.*max-age=31536000.*immutable' "$(hdrs "https://$D${ASSET:-/_astro/missing.css}")"
 ROBOTS=$(get "https://$D/robots.txt")
 check "robots.txt 200"               eq "$(code "https://$D/robots.txt")" 200
 check "robots.txt doesn't block *"   eq "$(blanket "$ROBOTS")" ""
@@ -83,5 +89,6 @@ else
   check "SPF -all"                   has '"v=spf1 -all"' "$(dig +short TXT "$D" @1.1.1.1)"
   check "DMARC p=reject"             has 'p=reject' "$(dig +short TXT "_dmarc.$D" @1.1.1.1)"
   check "DNSSEC validates (ad flag)" has '^;; flags:.* ad[ ;]' "$(dig +dnssec "$D" A @1.1.1.1)"
+  check "$WD no longer serves the site" lacks 'name="site-marker"' "$(get "https://$WD/")"
 fi
 exit $bad

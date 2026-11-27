@@ -25,5 +25,5 @@ npm-debug.log*
 # OS / editor
 .DS_Store
 
-# custom
+# the owner's local files: never committed (AGENTS.md)
 untracked/

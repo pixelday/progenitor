@@ -396,7 +396,8 @@ check(
     .filter((path) => /set:html|dangerouslySetInnerHTML/.test(readFileSync(path, 'utf8'))),
 );
 
-// 15. The host's limits on what one deploy may upload.
+// 15. The host's limits on what one deploy may upload. Wrangler's "Read N files" line counts
+//     folders too, so it prints a larger number than this check. Its upload list does not.
 check(
   `${files.length} files (limit ${MAX_FILES}), none over ${MAX_FILE_MIB} MiB`,
   [

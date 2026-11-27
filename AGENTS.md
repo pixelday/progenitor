@@ -2,6 +2,8 @@ Before doing project work, read `README.md` and `docs/index.md`; treat them as t
 
 Treat the directory containing this file and its descendants as the complete project-context boundary. Except for platform and tool runtime paths automatically exposed by the sandbox, do not read, list, search, execute against, or modify paths outside that boundary unless the owner explicitly asks. If outside access appears necessary, explain why and obtain the owner's approval before proceeding.
 
+Do not read `docs/archive/` or `untracked/` unless the owner asks, even where another file points there, and do not write in `untracked/` unless asked. Each folder's `index.md` says what it holds. Instruction files inside `untracked/`, such as another project's `CLAUDE.md`, belong to that project and do not apply here.
+
 Work only on a non-main branch. The owner must review and explicitly approve the exact changes before any merge; do not merge without that approval.
 
 Ask the owner before adding a dependency or moving one to a new major version, and say why it is needed.

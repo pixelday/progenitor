@@ -22,6 +22,14 @@ Later that day three checks were added: total CSS, the largest page and the host
 limits. `npm run build` now prints eighteen `PASS` lines, and each new check printed `FAIL` on
 a build tampered to break it.
 
+`verify-live.sh` also gained three checks that day, from the archived Cloudflare and GitHub
+guide before it was deleted (its other unique content moved into `docs/setup/`). In both
+modes, HTML must say `max-age=0, must-revalidate` and a file under `/_astro/` must say
+`immutable`: against the production `workers.dev` host the script printed 38 `PASS` lines.
+In prod mode, the `workers.dev` host given as a fourth argument must no longer serve the
+site. That line printed `FAIL` against a host still serving it, and has never run against a
+domain.
+
 The starter is on `main` of its public GitHub repository, behind a ruleset that requires a
 pull request and blocks force pushes (`docs/setup/2-github.md`, part 4). It is deployed as a
 Worker on a `workers.dev` hostname, unlaunched and `noindex`, and a merge to `main` builds
@@ -60,8 +68,9 @@ The owner does these. A session can verify each one.
   rewritten from the docs on 2026-11-25. If the originals turn up, compare them.
 - **Agent files in the site's repository.** `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.codex/` and
   `.gemini/` ship beside the site. Decide whether a site built from the starter keeps them.
-- **Stronger agent guards.** `docs/archive/workspace.md` proposes them. None is installed or
-  tested.
+- **Stronger agent guards.** `docs/archive/workspace.md` proposes them, and none of its
+  proposals is installed. One other guard is installed and tested: see `docs/stack-wiring.md`,
+  "Working with an agent", which also says how to test a guard.
 - **The manifest's `display` value.** It is `browser`. `standalone` would let a browser offer
   the site as an installable app.
 - **The React island.** The home page ships 83.4 KB of gzipped JavaScript for a search box and
