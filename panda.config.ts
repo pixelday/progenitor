@@ -27,6 +27,9 @@ export default defineConfig({
     html: { colorScheme: 'light dark' },
     'html[data-theme="light"]': { colorScheme: 'light' },
     'html[data-theme="dark"]': { colorScheme: 'dark' },
+    // Paper is light whatever the screen shows: browsers leave backgrounds out of print by
+    // default, so dark-scheme text would come out pale on white.
+    '@media print': { html: { colorScheme: 'light !important' } },
   },
 
   theme: {
@@ -36,6 +39,9 @@ export default defineConfig({
       // values here: each points at a palette token from @pandacss/preset-panda, or is a
       // color of its own. src/lib/contrast.test.ts fails the build if a pair falls below its
       // contrast ratio in either scheme. Keep themeColor in src/site.ts equal to `bg`.
+      // _moreContrast applies when the visitor asks the system for more contrast: muted text
+      // becomes body text and every edge gets stronger. It points at other tokens, so it
+      // follows the scheme by itself.
       semanticTokens: {
         colors: {
           bg: {
@@ -45,12 +51,12 @@ export default defineConfig({
           },
           fg: {
             DEFAULT: { value: 'light-dark({colors.gray.900}, {colors.gray.50})' }, // body text
-            muted: { value: 'light-dark({colors.gray.600}, {colors.gray.400})' }, // dates, counts, the footer
+            muted: { value: { base: 'light-dark({colors.gray.600}, {colors.gray.400})', _moreContrast: '{colors.fg}' } }, // dates, counts, the footer
             inverse: { value: 'light-dark({colors.white}, {colors.gray.950})' }, // text on bg.inverse
           },
           border: {
-            subtle: { value: 'light-dark({colors.gray.200}, {colors.gray.800})' }, // cards: decoration only
-            control: { value: 'light-dark({colors.gray.500}, {colors.gray.500})' }, // the edge of a control
+            subtle: { value: { base: 'light-dark({colors.gray.200}, {colors.gray.800})', _moreContrast: '{colors.border.control}' } }, // cards: decoration only
+            control: { value: { base: 'light-dark({colors.gray.500}, {colors.gray.500})', _moreContrast: '{colors.fg}' } }, // the edge of a control
           },
           focusRing: { value: 'light-dark({colors.blue.600}, {colors.blue.400})' },
         },

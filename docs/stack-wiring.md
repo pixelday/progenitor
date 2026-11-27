@@ -83,6 +83,20 @@ installed package or the current docs before trusting a remembered API.
   converts the palette's OKLCH values to sRGB itself; on every color the tokens use it agreed
   with Chrome's canvas to within 1/255. It also checks `themeColor` in `src/site.ts` against
   `bg`. (LOCAL)
+- **Panda's preference conditions have misleading names.** `_moreContrast` is
+  `prefers-contrast: more`. `_highContrast` is `forced-colors: active`, Windows High Contrast,
+  where the system replaces the page's colors. `_motionReduce`, `_motionSafe` and `_print` mean
+  what they say. (LOCAL: read from `@pandacss/preset-base`)
+- **Each preference, and what handles it** (LOCAL, in Chrome 158):
+  - *More contrast:* `_moreContrast` values on the tokens. Muted text becomes body text and
+    every edge becomes `fg`. They point at other tokens, so they follow the scheme.
+  - *Forced colors:* the system takes over every color, and with it the pressed toggle's fill,
+    which was its only sign of being pressed. The toggle sets `forcedColorAdjust: 'none'` and
+    the system colors `Highlight` and `HighlightText` under `_highContrast`. Any state shown
+    by color alone needs the same.
+  - *Print:* `color-scheme: light !important`, because browsers leave backgrounds out of print
+    and dark-scheme text would come out pale. The Theme select and the filters are hidden.
+  - *Reduced motion:* nothing animates. Put any animation or transition under `_motionSafe`.
 - **`strictTokens` would not keep palette colors out of components**, because palette colors
   are tokens too. `src/lib/tokens.test.ts` does that, and fails the build on a quoted palette
   name in `src/`. `strictTokens` would also reject plain values such as `'2px solid'`, so it

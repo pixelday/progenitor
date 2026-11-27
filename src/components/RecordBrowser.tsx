@@ -36,8 +36,8 @@ export default function RecordBrowser({ records, categories }: Props) {
     // The site's CSP has no nonce to give, so Base UI must not inject <style> elements.
     <CSPProvider disableStyleElements>
       <div className={css({ display: 'grid', gap: '4' })}>
-        {/* <search> is the landmark for a set of filter controls. */}
-        <search className={css({ display: 'flex', flexWrap: 'wrap', gap: '3', alignItems: 'center' })}>
+        {/* <search> is the landmark for a set of filter controls. On paper they do nothing. */}
+        <search className={css({ display: 'flex', flexWrap: 'wrap', gap: '3', alignItems: 'center', _print: { display: 'none' } })}>
           <Input
             type="search"
             aria-label="Search records"
@@ -75,7 +75,14 @@ export default function RecordBrowser({ records, categories }: Props) {
                   fontSize: 'sm',
                   cursor: 'pointer',
                   // Base UI sets data-pressed; Panda's _pressed condition matches it.
-                  _pressed: { bg: 'bg.inverse', color: 'fg.inverse', borderColor: 'bg.inverse' },
+                  _pressed: {
+                    bg: 'bg.inverse',
+                    color: 'fg.inverse',
+                    borderColor: 'bg.inverse',
+                    // Forced colors (Windows High Contrast) replace the fill, so the pressed
+                    // state would vanish. The system's own highlight colors keep it visible.
+                    _highContrast: { forcedColorAdjust: 'none', bg: 'Highlight', color: 'HighlightText', borderColor: 'Highlight' },
+                  },
                   _focusVisible: focusRing,
                 })}
               >

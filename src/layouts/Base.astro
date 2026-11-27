@@ -114,8 +114,8 @@ const focusRing = { outline: '2px solid', outlineColor: 'focusRing', outlineOffs
         <a href="/" class={css({ fontWeight: 'semibold' })}>{site.name}</a>
         {/* The light, dark or system choice (src/scripts/theme.js). Hidden until that script
             runs: without JavaScript the control could do nothing, and the page follows the
-            system. */}
-        <label hidden class={css({ display: 'flex', gap: '2', alignItems: 'center', fontSize: 'sm' })}>
+            system. Hidden in print, which is always light. */}
+        <label hidden class={css({ display: 'flex', gap: '2', alignItems: 'center', fontSize: 'sm', _print: { display: 'none' } })}>
           Theme
           <select
             id="theme"
