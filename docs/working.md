@@ -75,7 +75,19 @@ The owner does these. A session can verify each one.
   the site as an installable app.
 - **The React island.** The home page ships 83.4 KB of gzipped JavaScript for a search box and
   three toggles, and about 67 KB of that is React. The assessment in `docs/archive/`
-  recommends plain HTML and a small script for a control this simple.
+  recommends plain HTML and a small script for a control this simple. Measured with the
+  token layer in place, gzipped at level 9 as `verify-dist` counts:
+
+  | File | Gzipped | Raw |
+  |---|---|---|
+  | `client.*.js`: React DOM and Astro's island loader | 64.1 KB | 213 KB |
+  | `react.*.js`: React | 3.2 KB | 8 KB |
+  | `RecordBrowser.*.js`: the island, Base UI's Input and ToggleGroup, Panda's runtime | 16.1 KB | 46 KB |
+  | All CSS | 6.8 KB | 24 KB |
+  | `index.html`, with every record twice: as HTML and as the island's props | 4.3 KB | 13 KB |
+
+  The token layer changed none of these by more than 0.1 KB: CSS went from 6.75 to 6.84 KB,
+  the island from 16.12 to 16.13 KB.
 - **The React Compiler.** The starter runs `react()` without it, and nothing records why. The
   assessment in `docs/archive/` says to keep it on. It is `react({ compiler: true })` in
   `astro.config.ts` plus `oxc-transform-react` as a dev dependency. Expect no saving in size:
@@ -97,9 +109,6 @@ The owner does these. A session can verify each one.
 - **Fingerprint all six assets.** `scripts/verify-dist.mjs` refuses a launched site that still
   ships the starter's `favicon.svg`, `favicon.ico` or share image. `apple-touch-icon.png`,
   `icon-192.png` and `icon-512.png` are not on that list.
-- **A token layer.** Sixteen palette names such as `gray.900` are written into three files,
-  and `panda.config.ts` extends no theme. Semantic tokens would let a site change its colors
-  in one place.
 - **Color scheme and user preferences.** The page is light only. Nothing handles
   `prefers-color-scheme`, `prefers-contrast` or `forced-colors`. `prefers-reduced-motion` has
   nothing to act on, because nothing animates. `npm run audit` already loads every page in

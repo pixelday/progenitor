@@ -65,8 +65,15 @@ installed package or the current docs before trusting a remembered API.
   between them with a `cva` variant or a condition on a `data-*` attribute. Panda's usual
   answer, a CSS variable set with `style={{ '--size': size }}`, puts a `style=""` attribute in
   the built HTML, which the CSP rules out (below). (LOCAL)
-- **`strictTokens`** catches token typos but also rejects plain values such as `'2px solid'`.
-  Leave it off until there is a real token set. (RESEARCH)
+- **Colors are semantic tokens.** `panda.config.ts` names each color by its role (`fg`,
+  `fg.muted`, `bg.subtle`, `border.control`, `focusRing`) under `semanticTokens`, pointing at
+  the preset's palette. A `DEFAULT` key makes the bare name a token too: `fg` beside
+  `fg.muted`. Each becomes a CSS variable, such as `--colors-fg-muted:
+  var(--colors-gray-600)`, and `css({ color: 'fg.muted' })` uses it. (LOCAL)
+- **`strictTokens` would not keep palette colors out of components**, because palette colors
+  are tokens too. `src/lib/tokens.test.ts` does that, and fails the build on a quoted palette
+  name in `src/`. `strictTokens` would also reject plain values such as `'2px solid'`, so it
+  stays off. (LOCAL for the test; RESEARCH for `strictTokens`)
 
 ## Base UI
 
@@ -122,13 +129,13 @@ installed package or the current docs before trusting a remembered API.
 
 ## Size
 
-Measured from `dist/_astro` on 2026-11-25, gzipped (LOCAL):
+Measured from `dist/_astro` on 2026-11-26, gzipped at level 9 as `verify-dist` counts (LOCAL):
 
 | File | Size |
 |---|---|
 | React runtime (`client.*.js` and `react.*.js`) | 67.3 KB |
 | The island with Base UI Input and ToggleGroup | 16.1 KB |
-| All CSS | 6.6 KB |
+| All CSS | 6.8 KB |
 
 Only the home page loads any of the JavaScript. A page with no island ships none.
 

@@ -182,8 +182,9 @@ The rules above hold for every site. These hold for the starter.
    afterwards would start broken.
 2. **Brandless, not styleless.** The starter is styled and carries no brand: the name is
    "Site name", the address is `example.com` and the icons are a plain blue square. A site
-   should take on a brand by changing design tokens, not by editing components. The token
-   layer that would make that true is not built (`docs/working.md`).
+   takes on a brand by changing the semantic color tokens in `panda.config.ts`, not by editing
+   components. `src/lib/tokens.test.ts` fails the build if a component names a palette color
+   such as `gray.900` instead of a token.
 3. **The real checks from the first build.** A fresh copy passes `npm run build`, which is the
    only build script and the one the deploy is set to run. There is no relaxed script for a
    site that is just starting. The checks that apply only to a launched site turn on with

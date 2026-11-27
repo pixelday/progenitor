@@ -23,6 +23,32 @@ export default defineConfig({
     'astro-island, astro-slot, astro-static-slot': { display: 'contents' },
   },
 
-  theme: { extend: {} },
+  theme: {
+    extend: {
+      // The site's colors, by role. Components name these, never a palette color such as
+      // gray.900 (src/lib/tokens.test.ts fails the build if one does). To rebrand, change the
+      // values here: each points at a palette token from @pandacss/preset-panda, or is a
+      // color of its own.
+      semanticTokens: {
+        colors: {
+          bg: {
+            DEFAULT: { value: '{colors.white}' }, // the page
+            subtle: { value: '{colors.gray.100}' }, // tags
+            inverse: { value: '{colors.gray.900}' }, // a pressed toggle
+          },
+          fg: {
+            DEFAULT: { value: '{colors.gray.900}' }, // body text
+            muted: { value: '{colors.gray.600}' }, // dates, counts, the footer
+            inverse: { value: '{colors.white}' }, // text on bg.inverse
+          },
+          border: {
+            subtle: { value: '{colors.gray.200}' }, // cards: decoration only
+            control: { value: '{colors.gray.500}' }, // the edge of a control: needs 3:1
+          },
+          focusRing: { value: '{colors.blue.600}' },
+        },
+      },
+    },
+  },
   outdir: 'styled-system',
 });
