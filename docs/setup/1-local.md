@@ -185,12 +185,22 @@ Then run `npm run build` again. It must end with `all passed`.
 
 ## How the pieces fit
 
-- **Records to pages.** `src/content.config.ts` loads `src/data/records.yml` and validates it.
-  `src/pages/index.astro` lists the records; `src/pages/records/[id].astro` makes one static
-  page per record with no JavaScript.
-- **Records to the island.** `src/lib/records.ts` slims each record to the fields the list
-  needs before it becomes a prop. Props are written into the page's HTML, so never pass whole
-  records.
+- **One YAML file, two outputs.** `src/data/records.yml` is the only place a record's facts
+  are written. The build turns it into HTML, and into a JavaScript object for the island.
+  - *Records to pages.* `src/content.config.ts` loads the file and validates it: a bad record
+    fails the build and names the entry. `src/pages/index.astro` lists the records, and
+    `src/pages/records/[id].astro` makes one static page per record with no island.
+  - *Records to the island.* `src/lib/records.ts` slims each record to `RecordSummary`, the
+    fields the list and its filters read. Astro writes the island's props into the home
+    page's HTML, where anyone can read them, so never pass whole records. `verify-dist` fails
+    the build if the props carry a field `RecordSummary` does not list, or do not hold exactly
+    the records that have pages.
+- **Records checked as they are typed.** The first line of `src/data/records.yml` points an
+  editor's YAML extension at the schema the build writes, `.astro/collections/records.schema.json`.
+  VS Code's YAML extension (Red Hat) then marks a missing field or an `http:` source as it is
+  typed. Until the first `npm run build`, or `npx astro sync`, writes that file, the extension
+  says it cannot load the schema. (LOCAL: run through the extension's language server,
+  `yaml-language-server` 1.23.0, not through the editor itself.)
 - **One identity, one registry.** `src/site.ts` feeds the `<head>`, the share card, the
   structured data, the manifest, `robots.txt`, `sitemap.xml` and `llms.txt`.
   `src/lib/pages.ts` lists the fixed pages, and `src/lib/site-map.ts` adds the records. The

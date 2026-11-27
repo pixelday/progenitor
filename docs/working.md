@@ -103,18 +103,24 @@ The owner does these. A session can verify each one.
 - **How a site takes later changes from the starter.** A site begins as a copy, and nothing
   carries a later fix in the starter down to it. Decide whether that stays a port by hand.
   The second site (below) is where it will first cost something.
+- **Site settings in YAML.** The records are YAML; the site's settings are TypeScript, in
+  `src/site.ts`. One proposal: `src/data/site.yml` becomes the single source, and
+  `src/site.ts` shrinks to a loader that parses it, validates it with Zod from `astro/zod` and
+  exports the same typed `site`, so none of its importers change. What it costs:
+  - `yaml` becomes a direct dependency. Version 2.9.1 is already installed under Astro and
+    Vite, so no new code arrives, but `AGENTS.md` requires the owner's approval.
+  - `astro.config.ts` imports `src/site.ts`, so the loader has to run there too, before Vite.
+  - `scripts/verify-dist.mjs` and `scripts/tamper-test.mjs` read settings out of `src/site.ts`
+    with regular expressions. Both would read the YAML instead, in a change of their own.
+  - The type and its comments in `src/site.ts` become a Zod schema and comments in the YAML.
+
+  Whether the colors in `panda.config.ts` belong in the same file is part of the decision.
 
 ## Build next
 
 - **Fingerprint all six assets.** `scripts/verify-dist.mjs` refuses a launched site that still
   ships the starter's `favicon.svg`, `favicon.ico` or share image. `apple-touch-icon.png`,
   `icon-192.png` and `icon-512.png` are not on that list.
-- **Check records while they are edited.** `astro build` writes
-  `.astro/collections/records.schema.json` from the Zod schema. A first line of
-  `# yaml-language-server: $schema=../../.astro/collections/records.schema.json` in
-  `src/data/records.yml` would let an editor with a YAML extension flag a bad record before any
-  build. Try it in VS Code first: the generated schema types `updated` as `date-time`, so a
-  date such as `2026-10-02` may be flagged.
 - **A second site.** Build one from the starter by changing only data and settings. Until
   then, that claim is a design goal.
 - **The AI-crawler list.** `src/pages/robots.txt.ts` names five agents as of 2026-11-25. The

@@ -1,5 +1,9 @@
+# yaml-language-server: $schema=../../.astro/collections/records.schema.json
 # Source of truth for the "records" collection.
 # Loaded by src/content.config.ts and validated against its schema at build time.
+# The line above lets an editor with a YAML extension check each record as it is typed,
+# against the schema the build writes. Until the first build it reports that it cannot
+# load the schema.
 #
 # YAML rules that matter here:
 # - Quote anything that only looks numeric: versions ("1.10"), codes with leading
@@ -7,7 +11,8 @@
 # - 0x1F and 0o17 are numbers too (31 and 15). Quote them if they are text.
 # - A key with no value, or ~, is null, and a field declared .optional() rejects
 #   null. Leave the key out instead, or declare the field .nullable().
-# - Unquoted dates (2026-01-05) become Date objects. The schema accepts either form.
+# - Dates are YYYY-MM-DD, quoted or not: 2026-01-05 or "2026-01-05". Any other
+#   form, such as "Jan 5 2026", fails the build.
 # - `updated` is the as-of date shown beside the record. `source` must be https.
 
 - id: getting-started

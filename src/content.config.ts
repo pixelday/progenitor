@@ -11,8 +11,12 @@ const records = defineCollection({
     category: z.string(),
     tags: z.array(z.string()).default([]),
     summary: z.string(),
-    // The as-of date. Accepts an unquoted YAML date or a quoted "YYYY-MM-DD" string.
-    updated: z.coerce.date(),
+    // The as-of date: an unquoted YAML date, or a quoted "YYYY-MM-DD" string. Written as a
+    // union so the schema the build writes for editors accepts a plain date: z.coerce.date()
+    // comes out as date-time, which flags every 2026-10-02 as an error.
+    updated: z.union([z.date(), z.iso.date().transform((value) => new Date(value))], {
+      error: 'updated must be a date written as YYYY-MM-DD, quoted or not',
+    }),
     // Where the fact comes from. Links from data must be https.
     source: z.string().regex(/^https:\/\//, 'source must start with https://').optional(),
   }),
