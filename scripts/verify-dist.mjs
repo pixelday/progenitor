@@ -49,8 +49,12 @@ const STARTER_ASSETS = {
 // The starter's share image alt text. A launched site must have written its own.
 const STARTER_ALT = 'Describe the share image here.';
 
-// Pages allowed to load JavaScript. Every other page must ship none.
+// Pages allowed to load JavaScript. Every other page must ship none, except the theme script:
+// the light, dark or system choice, inlined into every page's <head>. It is allowed only as
+// <script> plus the exact text of this file plus </script>; any other script still fails.
 const PAGES_WITH_JS = ['index.html'];
+const THEME_SCRIPT = 'src/scripts/theme.js';
+const themeScript = existsSync(THEME_SCRIPT) ? readFileSync(THEME_SCRIPT, 'utf8') : null;
 
 // Gzipped size of all JS in dist/_astro. Measured at 83.4 KB on 2026-11-25: React is about
 // 67 KB of it, the island with Base UI's Input and ToggleGroup about 16 KB. Every island
@@ -69,8 +73,9 @@ const PAGE_BUDGET_KB = 50;
 const MAX_FILES = 20000;
 const MAX_FILE_MIB = 25;
 
-// The one file allowed to render a raw string (structured data, with "<" escaped).
-const SET_HTML_ALLOWED = ['src/components/JsonLd.astro'];
+// The files allowed to render a raw string: structured data, with "<" escaped, and the theme
+// script, which inlines a source file and never data.
+const SET_HTML_ALLOWED = ['src/components/JsonLd.astro', 'src/components/ThemeScript.astro'];
 
 const walk = (dir) =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
@@ -334,11 +339,15 @@ const blocksAll = robots
 check('robots.txt never blocks everything', blocksAll ? ['"Disallow: /" applies to every crawler'] : []);
 
 // 11. Weight: only the listed pages load JavaScript, and the JavaScript, the CSS and the
-//     largest page each stay inside a budget. A structured-data block is data, not script.
-const loadsJs = (html) =>
-  /<script[\s>]|<astro-island[\s>]/i.test(html.replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, ''));
+//     largest page each stay inside a budget. A structured-data block is data, not script,
+//     and the theme script is allowed everywhere, byte for byte.
+const withoutAllowedScripts = (html) => {
+  const rest = html.replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, '');
+  return themeScript === null ? rest : rest.replaceAll(`<script>${themeScript}</script>`, '');
+};
+const loadsJs = (html) => /<script[\s>]|<astro-island[\s>]/i.test(withoutAllowedScripts(html));
 check(
-  `only ${PAGES_WITH_JS.join(', ')} loads JavaScript`,
+  `only ${PAGES_WITH_JS.join(', ')} loads JavaScript, beyond ${THEME_SCRIPT}`,
   pages.filter(({ name, html }) => !PAGES_WITH_JS.includes(name) && loadsJs(html)).map(({ name }) => name),
 );
 const jsKB =
@@ -395,7 +404,8 @@ check(
   pages.filter(({ html }) => /localhost|\bTODO\b/.test(html)).map(({ name }) => name),
 );
 
-// 14. Data never renders as raw HTML. The structured-data component is the one exception.
+// 14. Data never renders as raw HTML. The structured-data component is one exception, and
+//     the component that inlines the theme script the other.
 check(
   `src/ uses set:html only in ${SET_HTML_ALLOWED.join(', ')}`,
   walk('src')

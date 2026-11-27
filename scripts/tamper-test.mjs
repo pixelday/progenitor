@@ -232,6 +232,7 @@ const cases = [
   // 11. Weight.
   { name: 'a second page loads a script file', base: 'site', fails: ['jsPages'], tamper: (d) => inHead(d, T, `<script type="module" src="${scriptOf(d)}"></script>`) },
   { name: 'a second page carries an island', base: 'site', fails: ['jsPages'], tamper: (d) => inMain(d, T, '<astro-island></astro-island>') },
+  { name: 'a second page carries an inline script', base: 'site', fails: ['jsPages', 'csp'], tamper: (d) => inHead(d, T, '<script>document.title="x"</script>') },
   { name: 'JavaScript is over budget', base: 'site', fails: ['jsBudget'], tamper: (d) => writeFileSync(dist(d, '_astro/pad.js'), incompressible(100)) },
   { name: 'CSS is over budget', base: 'site', fails: ['cssBudget'], tamper: (d) => writeFileSync(dist(d, '_astro/pad.css'), incompressible(100)) },
   { name: 'a page is over budget', base: 'site', fails: ['pageBudget'], tamper: (d) => inMain(d, T, `<!-- ${incompressible(100).toString('hex')} -->`) },
@@ -248,7 +249,7 @@ const cases = [
   { name: 'localhost in a page', base: 'site', fails: ['residue'], tamper: (d) => inMain(d, T, '<a href="http://localhost:4321/">x</a>') },
 
   // 14. Raw HTML only in the structured-data component.
-  { name: 'set:html outside JsonLd.astro', base: 'site', fails: ['setHtml'], tamper: (d) => writeFileSync(join(d, 'src/components/Raw.astro'), '<div set:html={"<b>x</b>"} />\n') },
+  { name: 'set:html outside the two allowed files', base: 'site', fails: ['setHtml'], tamper: (d) => writeFileSync(join(d, 'src/components/Raw.astro'), '<div set:html={"<b>x</b>"} />\n') },
   { name: 'dangerouslySetInnerHTML in a component', base: 'site', fails: ['setHtml'], tamper: (d) => writeFileSync(join(d, 'src/components/Raw.tsx'), 'export const Raw = () => <div dangerouslySetInnerHTML={{ __html: "x" }} />;\n') },
 
   // 15. The host's limits.

@@ -68,18 +68,18 @@ What `scripts/verify-dist.mjs` refuses to pass:
 | A page is built that the sitemap page does not list | Every page enters the registry (`src/lib/pages.ts`) that `sitemap.xml` and `llms.txt` read. |
 | `robots.txt` blocks every crawler | A blocked page can't show its `noindex`. |
 | A launched site still says `example.com` or "Site name", carries starter text, or ships the starter's icons, share image or share image alt text | Stops a launch with placeholders. |
-| A page other than the home page loads JavaScript, or total JS passes 90 KB gzipped | The budget was set from the first measurement, 83.4 KB. |
+| A page other than the home page loads JavaScript, apart from the theme script (`src/scripts/theme.js`, matched exactly), or total JS passes 90 KB gzipped | The budget was set from the first measurement, 83.4 KB. |
 | Total CSS passes 15 KB gzipped, or any one page passes 50 KB | The home page holds every record twice, as HTML and as the island's props, so it grows fastest with the data. |
 | More than 20,000 files, or one over 25 MiB | Cloudflare's limits for static assets on the free plan. A build past either passes here and fails at the deploy. |
 | An internal link, asset or `#fragment` points at nothing; a page link lacks its trailing slash | The host answers a slashless page path with a temporary redirect. |
-| `localhost` or `TODO` in built HTML; `set:html` in `src/` outside `src/components/JsonLd.astro` | Residue, and data rendered as raw HTML. |
+| `localhost` or `TODO` in built HTML; `set:html` in `src/` outside `src/components/JsonLd.astro` and `src/components/ThemeScript.astro` | Residue, and data rendered as raw HTML. |
 
 `npm run tamper` tests each check the other way. It needs no build first and leaves `dist/`
 alone: it builds two copies of the site in a temporary folder, one as it stands and one
 launched with test values, then breaks a copy of one of them for each case and runs
 `verify-dist` there. A case passes when exactly the checks it should trip print `FAIL`.
 Expect two controls, one coverage line and a `PASS` line for each case, ending with
-`tamper-test: 82 breaks, every one caught`.
+`tamper-test: 83 breaks, every one caught`.
 
 - A check added to `verify-dist` without a case fails the run, and so does a check that stops
   catching its case. A change to `verify-dist` therefore comes with its case.

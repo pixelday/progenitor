@@ -39,7 +39,9 @@ installed package or the current docs before trusting a remembered API.
   `sitemap-index.xml` plus `sitemap-0.xml`; it has no single-file mode. The endpoint reads the
   page registry, adds `<lastmod>`, and `verify-dist` checks it against the built pages. (LOCAL)
 - **Astro does not evaluate `{expressions}` inside `<script>`.** Structured data therefore
-  needs `set:html`, in one file: `src/components/JsonLd.astro`, which escapes `<`. (LOCAL)
+  needs `set:html`, in `src/components/JsonLd.astro`, which escapes `<`. The theme script
+  needs it too, in `src/components/ThemeScript.astro`, which inlines a source file. Those two
+  files are the only ones `verify-dist` allows to use it. (LOCAL)
 
 ## Panda CSS
 
