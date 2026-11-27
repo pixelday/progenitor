@@ -135,10 +135,24 @@ with `script-src 'self'` added to the header in `public/_headers` did not hydrat
 two CSP messages, so a silent failure here is detectable.
 
 `npm run audit` does all of this in Chrome, with the preview running in another terminal. It
-runs axe on every page in light and dark at 1280 and 320 px, then checks the island: it
-hydrates, filters, announces the count, stores the choice, keeps it across a reload, resets,
-works with storage blocked, and leaves every record a link with JavaScript off. Expect
-thirteen `PASS` lines.
+takes about two minutes. Expect 28 `PASS` lines:
+
+- axe, the console and sideways scrolling on every page in ten color modes: the system's light
+  and dark at 1280 and 320 px, Dark chosen on a light system and Light on a dark one, more
+  contrast in light and dark, and forced colors in light and dark
+- the island: it hydrates, filters, announces the count, stores the choice, keeps it across a
+  reload and resets
+- the Theme select: System by default, a choice that overrides the system and holds across a
+  reload and another page, and System again to clear it
+- a pressed toggle visibly changes in every color mode, forced colors included
+- with reduced motion nothing animates or transitions; print is light and leaves out the
+  controls
+- with storage blocked the filters and the Theme select still work; with JavaScript off every
+  record is a link and the Theme select is hidden
+
+Each of the newer checks was shown to fail on a build broken for it: the forced-colors fix
+removed, a transition added, the print rule removed, the theme script ignoring the stored
+choice, and the select shown without JavaScript.
 
 ## 5a. The other audits
 
