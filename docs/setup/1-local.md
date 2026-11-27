@@ -153,7 +153,8 @@ Run these by hand before launch and after any change to the layout. None is a de
 
 | File | Change |
 |---|---|
-| `src/site.ts` | `name`, `shortName`, `description`, `lang`, `themeColor`, the share image's `alt`, `contact`, `aiCrawlers`. Leave `url` and `launched` for step 4. |
+| `src/site.ts` | `name`, `shortName`, `description`, `lang`, `themeColor` (light and dark, each equal to the `bg` token), the share image's `alt`, `contact`, `aiCrawlers`. Leave `url` and `launched` for step 4. |
+| `panda.config.ts` | The colors, under `semanticTokens`: each is a light and a dark value. The build fails if a pair loses contrast. |
 | `public/` | The site's own icons and share image, under the same names: `favicon.ico` (holding a 32x32 image), `favicon.svg`, `apple-touch-icon.png` (180x180), `icon-192.png`, `icon-512.png` and `social.png` (1200x630). Any favicon generator makes the set. The build checks each file's type and size. |
 | `src/lib/pages.ts` | The fixed pages' titles and descriptions. |
 | `wrangler.jsonc` | `name`: the Worker's name. It appears in the public `workers.dev` hostname, so keep it neutral and treat it as permanent. `compatibility_date`: today. |

@@ -40,7 +40,11 @@ const link = css({ textDecoration: 'underline', _hover: { textDecoration: 'none'
     <meta name="description" content={description} />
     {indexable ? <link rel="canonical" href={canonical} /> : <meta name="robots" content="noindex, nofollow" />}
     <meta name="format-detection" content="telephone=no" />
-    <meta name="theme-color" content={site.themeColor} />
+    {/* The page follows the operating system's light or dark preference (panda.config.ts).
+        Saying so here lets the browser paint the right background before the CSS arrives. */}
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content={site.themeColor.light} />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content={site.themeColor.dark} />
 
     {/* Icons. The files live in public/, and verify-dist checks their type and size.
         sizes="32x32" on the ICO makes browsers that can use the SVG prefer it. */}

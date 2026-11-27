@@ -21,6 +21,9 @@ export default defineConfig({
     // Astro's island wrappers must not affect layout. Astro would inject this rule as a
     // <style> in <body>; astro.config.ts removes that element, so the rule lives here.
     'astro-island, astro-slot, astro-static-slot': { display: 'contents' },
+    // The color scheme. Every color token below is light-dark(<light>, <dark>), and this
+    // property picks the half: "light dark" follows the operating system.
+    html: { colorScheme: 'light dark' },
   },
 
   theme: {
@@ -28,24 +31,25 @@ export default defineConfig({
       // The site's colors, by role. Components name these, never a palette color such as
       // gray.900 (src/lib/tokens.test.ts fails the build if one does). To rebrand, change the
       // values here: each points at a palette token from @pandacss/preset-panda, or is a
-      // color of its own.
+      // color of its own. src/lib/contrast.test.ts fails the build if a pair falls below its
+      // contrast ratio in either scheme. Keep themeColor in src/site.ts equal to `bg`.
       semanticTokens: {
         colors: {
           bg: {
-            DEFAULT: { value: '{colors.white}' }, // the page
-            subtle: { value: '{colors.gray.100}' }, // tags
-            inverse: { value: '{colors.gray.900}' }, // a pressed toggle
+            DEFAULT: { value: 'light-dark({colors.white}, {colors.gray.950})' }, // the page
+            subtle: { value: 'light-dark({colors.gray.100}, {colors.gray.800})' }, // tags
+            inverse: { value: 'light-dark({colors.gray.900}, {colors.gray.100})' }, // a pressed toggle
           },
           fg: {
-            DEFAULT: { value: '{colors.gray.900}' }, // body text
-            muted: { value: '{colors.gray.600}' }, // dates, counts, the footer
-            inverse: { value: '{colors.white}' }, // text on bg.inverse
+            DEFAULT: { value: 'light-dark({colors.gray.900}, {colors.gray.50})' }, // body text
+            muted: { value: 'light-dark({colors.gray.600}, {colors.gray.400})' }, // dates, counts, the footer
+            inverse: { value: 'light-dark({colors.white}, {colors.gray.950})' }, // text on bg.inverse
           },
           border: {
-            subtle: { value: '{colors.gray.200}' }, // cards: decoration only
-            control: { value: '{colors.gray.500}' }, // the edge of a control: needs 3:1
+            subtle: { value: 'light-dark({colors.gray.200}, {colors.gray.800})' }, // cards: decoration only
+            control: { value: 'light-dark({colors.gray.500}, {colors.gray.500})' }, // the edge of a control
           },
-          focusRing: { value: '{colors.blue.600}' },
+          focusRing: { value: 'light-dark({colors.blue.600}, {colors.blue.400})' },
         },
       },
     },

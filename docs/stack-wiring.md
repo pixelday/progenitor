@@ -68,8 +68,19 @@ installed package or the current docs before trusting a remembered API.
 - **Colors are semantic tokens.** `panda.config.ts` names each color by its role (`fg`,
   `fg.muted`, `bg.subtle`, `border.control`, `focusRing`) under `semanticTokens`, pointing at
   the preset's palette. A `DEFAULT` key makes the bare name a token too: `fg` beside
-  `fg.muted`. Each becomes a CSS variable, such as `--colors-fg-muted:
-  var(--colors-gray-600)`, and `css({ color: 'fg.muted' })` uses it. (LOCAL)
+  `fg.muted`. Each becomes a CSS variable and `css({ color: 'fg.muted' })` uses it. (LOCAL)
+- **Light and dark come from one value per token.** Each token is `light-dark(<light>,
+  <dark>)`, and Panda resolves the references inside it: `--colors-fg-muted:
+  light-dark(var(--colors-gray-600), var(--colors-gray-400))`. The CSS `color-scheme` property
+  picks the half. `html { color-scheme: light dark }` follows the operating system, so the
+  dark values need no condition and no second selector. `<meta name="color-scheme">` says the
+  same before the CSS loads. `light-dark()` needs Chrome 123, Firefox 120 or Safari 17.5. (LOCAL
+  in Chrome 158; the versions are DOCS)
+- **`src/lib/contrast.test.ts` checks every token pair** in light and dark, with and without
+  more contrast: text at 7:1, control edges, the focus ring and the pressed state at 3:1. It
+  converts the palette's OKLCH values to sRGB itself; on every color the tokens use it agreed
+  with Chrome's canvas to within 1/255. It also checks `themeColor` in `src/site.ts` against
+  `bg`. (LOCAL)
 - **`strictTokens` would not keep palette colors out of components**, because palette colors
   are tokens too. `src/lib/tokens.test.ts` does that, and fails the build on a quoted palette
   name in `src/`. `strictTokens` would also reject plain values such as `'2px solid'`, so it
