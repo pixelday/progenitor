@@ -97,11 +97,6 @@ The owner does these. A session can verify each one.
 - **Fingerprint all six assets.** `scripts/verify-dist.mjs` refuses a launched site that still
   ships the starter's `favicon.svg`, `favicon.ico` or share image. `apple-touch-icon.png`,
   `icon-192.png` and `icon-512.png` are not on that list.
-- **Guard the fingerprints.** If the starter's own icons change and the hashes in
-  `STARTER_ASSETS` do not, the check passes silently. Nothing catches that.
-- **Keep the tamper test.** Every check in `verify-dist` was proven by breaking a build on
-  purpose, forty ways, and confirming a `FAIL` each time. That harness ran from a temporary
-  folder and is not in the repository. Port it if the checks keep changing.
 - **A token layer.** Sixteen palette names such as `gray.900` are written into three files,
   and `panda.config.ts` extends no theme. Semantic tokens would let a site change its colors
   in one place.

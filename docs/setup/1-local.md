@@ -74,7 +74,18 @@ What `scripts/verify-dist.mjs` refuses to pass:
 | An internal link, asset or `#fragment` points at nothing; a page link lacks its trailing slash | The host answers a slashless page path with a temporary redirect. |
 | `localhost` or `TODO` in built HTML; `set:html` in `src/` outside `src/components/JsonLd.astro` | Residue, and data rendered as raw HTML. |
 
-Each check was also tested the other way: a build tampered to break it prints `FAIL`.
+`npm run tamper` tests each check the other way. It needs no build first and leaves `dist/`
+alone: it builds two copies of the site in a temporary folder, one as it stands and one
+launched with test values, then breaks a copy of one of them for each case and runs
+`verify-dist` there. A case passes when exactly the checks it should trip print `FAIL`.
+Expect two controls, one coverage line and a `PASS` line for each case, ending with
+`tamper-test: 79 breaks, every one caught`.
+
+- A check added to `verify-dist` without a case fails the run, and so does a check that stops
+  catching its case. A change to `verify-dist` therefore comes with its case.
+- If the starter's `favicon.svg`, `favicon.ico` or share image changes while its fingerprint
+  in `STARTER_ASSETS` does not, the run fails and says so. A site that has replaced its name
+  and icons skips those three cases instead, since it no longer has the starter's files.
 
 `html-validate` runs before it, with the rules in `.htmlvalidate.mjs`. One rule is off, and
 the file says why.

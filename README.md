@@ -92,6 +92,7 @@ Each claim in `docs/setup/` carries one of these tags.
 | `npm run preview` | Serves `dist/` the way Cloudflare will, with the headers and the real 404. Build first. |
 | `npm run audit` | Browser checks against the preview: axe on every page, then the island's behavior. Needs Chrome, so it is not part of the build. Run it before a pull request. |
 | `npm test` | Unit tests only. |
+| `npm run tamper` | Tests the checker: breaks a build on purpose, one way per case, and confirms `verify-dist` fails each time. Run it after any change to `scripts/verify-dist.mjs`. |
 
 There is no `deploy` script on purpose. Deploys come only from Cloudflare building a merge to
 `main`.
@@ -120,6 +121,7 @@ astro.config.ts         static output, the Content Security Policy, Panda
 wrangler.jsonc          the Cloudflare Worker: static assets only, no code
 .htmlvalidate.mjs       markup rules for the built HTML
 scripts/verify-dist.mjs checks the build; runs inside `npm run build`
+scripts/tamper-test.mjs checks verify-dist by breaking builds on purpose; `npm run tamper`
 scripts/audit.mjs       checks a served build in a browser; `npm run audit`
 scripts/verify-live.sh  checks a deployed host; run it after every deploy
 ```
