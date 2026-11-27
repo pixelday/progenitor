@@ -95,7 +95,7 @@ The owner does these. A session can verify each one.
 - **The archive's future.** If `docs/archive/` goes, eight lines outside this file point into
   it. Find them with `git grep -n 'docs/archive' -- . ':!docs/archive' ':!docs/working.md'`.
 - **Whether the accessibility page is mandatory.** Today it is: the build fails without
-  `/accessibility/`, a launched build refuses its starter text, and `scripts/verify-live.sh`
+  `/accessibility`, a launched build refuses its starter text, and `scripts/verify-live.sh`
   expects it to answer 200. Decide whether every site must publish one. This is for later:
   nothing waits on it. If the answer is no, the requirement comes out of
   `scripts/verify-dist.mjs`, `scripts/verify-live.sh`, `src/lib/pages.ts` and its test, and

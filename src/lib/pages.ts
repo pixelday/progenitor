@@ -6,7 +6,10 @@ import { site } from '../site';
  * A page added to src/pages/ but not here fails the build (scripts/verify-dist.mjs).
  */
 export type PageEntry = {
-  /** Root-relative, with a trailing slash: the form the host serves without a redirect. */
+  /**
+   * Root-relative, the form the host serves without a redirect: no trailing slash for a
+   * page, and a slash only for a folder's index.html, such as the home page.
+   */
   path: string;
   title: string;
   description: string;
@@ -17,24 +20,24 @@ export type PageEntry = {
 export const pages = {
   home: { path: '/', title: 'Home', description: site.description },
   privacy: {
-    path: '/privacy-policy/',
+    path: '/privacy-policy',
     title: 'Privacy policy',
     description: 'What this site stores on your device, and what it never collects.',
     updated: site.legalUpdated,
   },
   terms: {
-    path: '/terms/',
+    path: '/terms',
     title: 'Terms',
     description: 'Terms of use, the content license and credits.',
     updated: site.legalUpdated,
   },
   accessibility: {
-    path: '/accessibility/',
+    path: '/accessibility',
     title: 'Accessibility',
     description: 'The accessibility standard this site aims for, and how to report a barrier.',
     updated: site.legalUpdated,
   },
-  sitemap: { path: '/sitemap/', title: 'Sitemap', description: 'Every page on this site, in one list.' },
+  sitemap: { path: '/sitemap', title: 'Sitemap', description: 'Every page on this site, in one list.' },
 } satisfies Record<string, PageEntry>;
 
 /** The footer of every page links these three. */

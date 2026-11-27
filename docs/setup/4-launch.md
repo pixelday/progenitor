@@ -82,8 +82,8 @@ What the switch does, all of it tested by building both ways (LOCAL):
 - every page except the 404 loses `noindex` and gains `<link rel="canonical">`, a share card
   and, on the home page, structured data, all on the new origin
 - `robots.txt` gains `Sitemap: https://<apex>/sitemap.xml`
-- `sitemap.xml` appears. It lists every page on the new origin, with trailing slashes and a
-  last-modified date where one is known, and leaves out the 404
+- `sitemap.xml` appears. It lists every page on the new origin, without trailing slashes
+  and with a last-modified date where one is known, and leaves out the 404
 - `llms.txt` appears, if `aiCrawlers` is `'allow'`
 - `npm run build` fails if the URL is still `example.com`, the name is still "Site name", a
   legal page still carries starter text, or the icons, the share image or its alt text are

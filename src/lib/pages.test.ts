@@ -9,7 +9,7 @@ describe('site identity', () => {
   });
 
   it('builds absolute URLs from config', () => {
-    expect(absolute('/terms/')).toBe(`${site.url}/terms/`);
+    expect(absolute('/terms')).toBe(`${site.url}/terms`);
     expect(absolute(site.shareImage.path)).toBe(`${site.url}${site.shareImage.path}`);
   });
 
@@ -22,8 +22,8 @@ describe('site identity', () => {
 describe('page registry', () => {
   const entries = Object.values(pages);
 
-  it('uses unique root-relative paths that end with a slash', () => {
-    for (const { path } of entries) expect(path).toMatch(/^\/([a-z0-9-]+\/)*$/);
+  it('uses unique root-relative paths with no trailing slash, except the home page', () => {
+    for (const { path } of entries) expect(path).toMatch(/^\/([a-z0-9-]+(\/[a-z0-9-]+)*)?$/);
     expect(new Set(entries.map(({ path }) => path)).size).toBe(entries.length);
   });
 
@@ -35,6 +35,6 @@ describe('page registry', () => {
   });
 
   it('lists privacy, terms and accessibility as the legal pages', () => {
-    expect(legalPages.map(({ path }) => path)).toEqual(['/privacy-policy/', '/terms/', '/accessibility/']);
+    expect(legalPages.map(({ path }) => path)).toEqual(['/privacy-policy', '/terms', '/accessibility']);
   });
 });

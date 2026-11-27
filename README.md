@@ -133,7 +133,7 @@ The build fails if any of it is missing, malformed or out of step.
 
 | What | Where it comes from |
 |---|---|
-| `/`, a page per record, `/privacy-policy/`, `/terms/`, `/accessibility/`, `/sitemap/`, a real 404 | `src/pages/` |
+| `/`, a page per record, `/privacy-policy`, `/terms`, `/accessibility`, `/sitemap`, a real 404 | `src/pages/` |
 | `robots.txt`, `manifest.webmanifest` | `src/pages/*.ts`, from `src/site.ts` |
 | `sitemap.xml`, `llms.txt` | the same, on a launched site only |
 | `favicon.ico`, `favicon.svg`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `social.png` | `public/`. The starter's are a plain blue square and card: a site replaces all six |

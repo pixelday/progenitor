@@ -22,8 +22,9 @@ const fullTitle = title ? `${title} · ${site.name}` : site.name;
 // The launch switch. An indexable page states its absolute URL (canonical, share card,
 // structured data). Any other page says noindex and states none.
 const indexable = site.launched && !noindex;
-// Absolute URL built from config, never from the request.
-const canonical = absolute(Astro.url.pathname);
+// Absolute URL built from config, never from the request. The build names a page
+// /terms.html; the host serves it at /terms.
+const canonical = absolute(Astro.url.pathname.replace(/\.html$/, ''));
 
 // The commit this build came from. Workers Builds sets the variable at build time;
 // a local build says "local". scripts/verify-live.sh reads it to prove which deploy is live.

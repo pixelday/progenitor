@@ -17,10 +17,10 @@ const SHARE_IMAGE = readFileSync('src/site.ts', 'utf8').match(/shareImage:\s*\{\
 const REQUIRED = [
   'index.html',
   '404.html',
-  'privacy-policy/index.html',
-  'terms/index.html',
-  'accessibility/index.html',
-  'sitemap/index.html',
+  'privacy-policy.html',
+  'terms.html',
+  'accessibility.html',
+  'sitemap.html',
   '_headers',
   'robots.txt',
   'manifest.webmanifest',
@@ -124,8 +124,9 @@ const hasNoindex = (html) => meta(html, 'robots').some((content) => /noindex/i.t
 const canonicalOf = (html) => linkHref(html, 'canonical')[0];
 const jsonLdBlocks = (html) =>
   [...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
-// The path a built page is served at: index.html -> /, terms/index.html -> /terms/.
-const servedPath = (name) => `/${name.replace(/index\.html$/, '')}`;
+// The path a built page is served at: index.html -> /, terms.html -> /terms,
+// records/x.html -> /records/x, and a folder's index, a/index.html -> /a/.
+const servedPath = (name) => `/${name.replace(/index\.html$/, '').replace(/\.html$/, '')}`;
 
 // 1. Required files.
 check(
@@ -308,7 +309,7 @@ check(`the launch switch is applied everywhere (this build is ${launched ? 'LAUN
 
 // 8. The sitemap page links every built page except the 404, so a page cannot be added
 //    without entering the registry (src/lib/pages.ts) that sitemap.xml and llms.txt read.
-const sitemapPageLinks = new Set(tags(text('sitemap/index.html'), 'a').map((tag) => attr(tag, 'href')));
+const sitemapPageLinks = new Set(tags(text('sitemap.html'), 'a').map((tag) => attr(tag, 'href')));
 check(
   'the sitemap page lists every page',
   pages
@@ -369,7 +370,8 @@ check(
 );
 
 // 12. Internal links, assets and #fragments point at something that exists. Links to pages use
-//     the trailing-slash form, which the host serves without a redirect.
+//     the form the host serves without a redirect: /terms for terms.html, and a trailing slash
+//     only for a folder's index.html.
 const idsOf = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]));
 const pageByName = new Map(pages.map((page) => [page.name, page]));
 const linkProblems = [];
@@ -385,9 +387,17 @@ for (const { name, html } of pages) {
         linkProblems.push(`${name}: relative link "${url}" (use a root-relative path)`);
         continue;
       }
-      target = path.endsWith('/') ? `${path.slice(1)}index.html` : path.slice(1);
+      const file = path.slice(1);
+      if (path.endsWith('.html')) {
+        linkProblems.push(`${name}: "${url}" names the .html file (link the page without it)`);
+        continue;
+      }
+      if (path.endsWith('/')) target = `${file}index.html`;
+      else target = inDist(`${file}.html`) ? `${file}.html` : file;
       if (!inDist(target)) {
-        linkProblems.push(`${name}: "${url}" does not exist in ${DIST}/ (page links end with a slash)`);
+        linkProblems.push(
+          `${name}: "${url}" does not exist in ${DIST}/ (a page link has no trailing slash; only a folder index ends in one)`,
+        );
         continue;
       }
     }
@@ -451,7 +461,7 @@ const islandRecords = pages.flatMap(({ name, html }) =>
     return Array.isArray(records) ? [{ name, records }] : [];
   }),
 );
-const recordPages = pages.map(({ name }) => name.match(/^records\/([^/]+)\/index\.html$/)?.[1]).filter(Boolean);
+const recordPages = pages.map(({ name }) => name.match(/^records\/([^/]+)\.html$/)?.[1]).filter(Boolean);
 check(
   `the island's props hold every record and only the fields of RecordSummary`,
   summaryFields === undefined
@@ -464,8 +474,8 @@ check(
               .filter((key) => !summaryFields.includes(key))
               .map((key) => `${name}: record "${record.id}" carries "${key}", which RecordSummary does not have`),
           ),
-          ...recordPages.filter((id) => !ids.includes(id)).map((id) => `${name}: /records/${id}/ is built, but its record is not in the props`),
-          ...ids.filter((id) => !recordPages.includes(id)).map((id) => `${name}: "${id}" is in the props, but /records/${id}/ is not built`),
+          ...recordPages.filter((id) => !ids.includes(id)).map((id) => `${name}: /records/${id} is built, but its record is not in the props`),
+          ...ids.filter((id) => !recordPages.includes(id)).map((id) => `${name}: "${id}" is in the props, but /records/${id} is not built`),
         ];
       }),
 );

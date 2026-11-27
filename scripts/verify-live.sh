@@ -57,10 +57,11 @@ for f in favicon.ico favicon.svg apple-touch-icon.png icon-192.png icon-512.png 
 done
 check "favicon.ico is an icon"       has '^image/(x-icon|vnd\.microsoft\.icon)' "$(ctype "https://$D/favicon.ico")"
 check "manifest is a manifest"       has '^application/manifest\+json' "$(ctype "https://$D/manifest.webmanifest")"
-check "privacy policy 200"           eq "$(code "https://$D/privacy-policy/")" 200
-check "terms 200"                    eq "$(code "https://$D/terms/")" 200
-check "accessibility 200"            eq "$(code "https://$D/accessibility/")" 200
-check "sitemap page 200"             eq "$(code "https://$D/sitemap/")" 200
+check "privacy policy 200"           eq "$(code "https://$D/privacy-policy")" 200
+check "terms 200"                    eq "$(code "https://$D/terms")" 200
+check "accessibility 200"            eq "$(code "https://$D/accessibility")" 200
+check "sitemap page 200"             eq "$(code "https://$D/sitemap")" 200
+check "/terms/ redirects to /terms"  eq "$(dest "https://$D/terms/")" "https://$D/terms"
 
 if [ "$MODE" = preview ]; then
   check "noindex on this host"       has '^x-robots-tag:.*noindex' "$PH"

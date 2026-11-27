@@ -30,7 +30,10 @@ export default defineConfig({
   // Static output is the default. There is no adapter on purpose.
   site: site.url,
   integrations: [react(), hoistIslandStyle],
-  build: { inlineStylesheets: 'never' },
+  // 'preserve' builds terms.astro as terms.html and an index.astro as index.html. The host's
+  // default html_handling (auto-trailing-slash) then serves /terms without a slash and a
+  // folder index at /folder/, and redirects the other spelling of each with a 307.
+  build: { inlineStylesheets: 'never', format: 'preserve' },
   markdown: { syntaxHighlight: false },
   security: {
     csp: {

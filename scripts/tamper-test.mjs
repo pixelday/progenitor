@@ -91,7 +91,7 @@ const scriptOf = (d) => read(d, 'index.html').match(/component-url="([^"]+)"/)[1
 // The cases. `base` is the build a case starts from: 'site' (not launched) or 'launched'.
 // `fails` is every check that must print FAIL, and no other may.
 
-const T = 'terms/index.html';
+const T = 'terms.html';
 
 const cases = [
   // verify-dist stops at once without a build.
@@ -100,7 +100,7 @@ const cases = [
   // 1. Required files.
   { name: '404.html is missing', base: 'site', fails: ['required'], tamper: (d) => remove(d, '404.html') },
   { name: '_headers is missing', base: 'site', fails: ['required'], tamper: (d) => remove(d, '_headers') },
-  { name: 'the accessibility page is missing', base: 'site', fails: ['required', 'links'], tamper: (d) => remove(d, 'accessibility') },
+  { name: 'the accessibility page is missing', base: 'site', fails: ['required', 'links'], tamper: (d) => remove(d, 'accessibility.html') },
   { name: 'the manifest is missing', base: 'site', fails: ['required', 'icons', 'links'], tamper: (d) => remove(d, 'manifest.webmanifest') },
 
   // 2. The CSP <meta>, with a hash for every inline block.
@@ -120,7 +120,7 @@ const cases = [
   { name: 'no viewport', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<meta name="viewport"[^>]*>/, '') },
   { name: 'the viewport disables zoom', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, 'initial-scale=1"', 'initial-scale=1, maximum-scale=1"') },
   { name: 'an empty <title>', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<title>[^<]*<\/title>/, '<title></title>') },
-  { name: 'two pages share a title', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<title>[^<]*<\/title>/, read(d, 'privacy-policy/index.html').match(/<title>[^<]*<\/title>/)[0]) },
+  { name: 'two pages share a title', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<title>[^<]*<\/title>/, read(d, 'privacy-policy.html').match(/<title>[^<]*<\/title>/)[0]) },
   { name: 'no meta description', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<meta name="description"[^>]*>/, '') },
   { name: 'no theme-color', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<meta name="theme-color"[^>]*>/g, '') },
   { name: 'an empty theme-color', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /(<meta name="theme-color"[^>]*content=")[^"]*"/, '$1"') },
@@ -182,20 +182,20 @@ const cases = [
 
   // 7. The launch switch, after launch.
   { name: 'robots.txt has no Sitemap line', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, 'robots.txt', /^Sitemap: .*$/m, '') },
-  { name: 'sitemap.xml leaves out a page', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, 'sitemap.xml', /<url><loc>[^<]*\/terms\/<\/loc>.*?<\/url>/s, '') },
-  { name: 'sitemap.xml lists a page that is not built', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, 'sitemap.xml', '</urlset>', '<url><loc>https://tamper.test/gone/</loc></url></urlset>') },
+  { name: 'sitemap.xml leaves out a page', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, 'sitemap.xml', /<url><loc>[^<]*\/terms<\/loc>.*?<\/url>/s, '') },
+  { name: 'sitemap.xml lists a page that is not built', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, 'sitemap.xml', '</urlset>', '<url><loc>https://tamper.test/gone</loc></url></urlset>') },
   { name: 'llms.txt is missing while AI crawlers are allowed', base: 'launched', fails: ['launch'], tamper: (d) => remove(d, 'llms.txt') },
   { name: 'llms.txt exists while robots.txt blocks AI crawlers', base: 'launched', fails: ['launch'], tamper: (d) => appendFileSync(dist(d, 'robots.txt'), '\nUser-agent: GPTBot\nDisallow: /\n') },
   { name: 'canonicals use two origins', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, T, '<link rel="canonical" href="https://tamper.test/', '<link rel="canonical" href="https://other.test/') },
-  { name: 'a canonical points at another page', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, T, '<link rel="canonical" href="https://tamper.test/terms/"', '<link rel="canonical" href="https://tamper.test/accessibility/"') },
-  { name: 'og:url is not the canonical', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, T, '<meta property="og:url" content="https://tamper.test/terms/"', '<meta property="og:url" content="https://tamper.test/"') },
+  { name: 'a canonical points at another page', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, T, '<link rel="canonical" href="https://tamper.test/terms"', '<link rel="canonical" href="https://tamper.test/accessibility"') },
+  { name: 'og:url is not the canonical', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, T, '<meta property="og:url" content="https://tamper.test/terms"', '<meta property="og:url" content="https://tamper.test/"') },
   { name: 'a share card has no og:title', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, T, /<meta property="og:title"[^>]*>/, '') },
   { name: 'og:image is on another host', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, T, /(<meta property="og:image" content=")[^"]*"/, '$1https://other.test/social.png"') },
   { name: 'the home page has no WebSite structured data', base: 'launched', fails: ['launch'], tamper: (d) => edit(d, 'index.html', /<script type="application\/ld\+json">[\s\S]*?<\/script>/, '') },
   { name: 'structured data is not valid JSON', base: 'launched', fails: ['launch', 'csp'], tamper: (d) => edit(d, 'index.html', '<script type="application/ld+json">{', '<script type="application/ld+json">{,') },
 
   // 8. The sitemap page lists every page.
-  { name: 'the sitemap page leaves out a record', base: 'site', fails: ['sitemapPage'], tamper: (d) => edit(d, 'sitemap/index.html', /<a href="\/records\/[^"]+"/, '<a href="/"') },
+  { name: 'the sitemap page leaves out a record', base: 'site', fails: ['sitemapPage'], tamper: (d) => edit(d, 'sitemap.html', /<a href="\/records\/[^"]+"/, '<a href="/"') },
   {
     name: 'a page is built outside the registry',
     base: 'site',
@@ -240,10 +240,11 @@ const cases = [
   { name: 'a page is over budget', base: 'site', fails: ['pageBudget'], tamper: (d) => inMain(d, T, `<!-- ${incompressible(100).toString('hex')} -->`) },
 
   // 12. Internal links, assets and fragments.
-  { name: 'a link to a page that does not exist', base: 'site', fails: ['links'], tamper: (d) => inMain(d, T, '<a href="/no-such-page/">x</a>') },
-  { name: 'a page link without its trailing slash', base: 'site', fails: ['links'], tamper: (d) => inMain(d, T, '<a href="/privacy-policy">x</a>') },
-  { name: 'a relative link', base: 'site', fails: ['links'], tamper: (d) => inMain(d, T, '<a href="privacy-policy/">x</a>') },
-  { name: 'a link to a missing #fragment', base: 'site', fails: ['links'], tamper: (d) => inMain(d, T, '<a href="/privacy-policy/#no-such-id">x</a>') },
+  { name: 'a link to a page that does not exist', base: 'site', fails: ['links'], tamper: (d) => inMain(d, T, '<a href="/no-such-page">x</a>') },
+  { name: 'a page link with a trailing slash', base: 'site', fails: ['links'], tamper: (d) => inMain(d, T, '<a href="/privacy-policy/">x</a>') },
+  { name: "a link to a page's .html file", base: 'site', fails: ['links'], tamper: (d) => inMain(d, T, '<a href="/privacy-policy.html">x</a>') },
+  { name: 'a relative link', base: 'site', fails: ['links'], tamper: (d) => inMain(d, T, '<a href="privacy-policy">x</a>') },
+  { name: 'a link to a missing #fragment', base: 'site', fails: ['links'], tamper: (d) => inMain(d, T, '<a href="/privacy-policy#no-such-id">x</a>') },
   { name: 'a stylesheet that does not exist', base: 'site', fails: ['links'], tamper: (d) => edit(d, T, /href="\/_astro\/[^"]+\.css"/, 'href="/_astro/missing.css"') },
 
   // 13. Residue.

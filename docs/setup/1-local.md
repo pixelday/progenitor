@@ -71,7 +71,7 @@ What `scripts/verify-dist.mjs` refuses to pass:
 | A page other than the home page loads JavaScript, apart from the theme script (`src/scripts/theme.js`, matched exactly), or total JS passes 90 KB gzipped | The budget was set from the first measurement, 83.4 KB. |
 | Total CSS passes 15 KB gzipped, or any one page passes 50 KB | The home page holds every record twice, as HTML and as the island's props, so it grows fastest with the data. |
 | More than 20,000 files, or one over 25 MiB | Cloudflare's limits for static assets on the free plan. A build past either passes here and fails at the deploy. |
-| An internal link, asset or `#fragment` points at nothing; a page link lacks its trailing slash | The host answers a slashless page path with a temporary redirect. |
+| An internal link, asset or `#fragment` points at nothing; a page link ends in a slash or `.html` | The host serves `terms.html` at `/terms` and answers `/terms/` and `/terms.html` with a temporary redirect. Only a folder's `index.html`, such as the home page, is served with a trailing slash. |
 | `localhost` or `TODO` in built HTML; `set:html` in `src/` outside `src/components/JsonLd.astro` and `src/components/ThemeScript.astro` | Residue, and data rendered as raw HTML. |
 | The island's props, written into the home page, leave out a record that has a page, name one that has none, or carry a field that `RecordSummary` in `src/lib/records.ts` does not list | Props are public in the page source. Only what the list needs goes there, and it must match the pages. |
 
@@ -102,8 +102,8 @@ It prints the address it serves on. With `B` set to that address, expect:
 ```bash
 B=http://localhost:8787
 curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' $B/              # 200
-curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' $B/terms/        # 200
-curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' $B/terms         # 307 .../terms/
+curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' $B/terms         # 200
+curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' $B/terms/        # 307 .../terms
 curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' $B/no-such-page  # 404
 curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' $B/sitemap.xml   # 404 until launch
 curl -s -o /dev/null -w '%{http_code} %{content_type}\n' $B/favicon.ico   # 200 image/vnd.microsoft.icon

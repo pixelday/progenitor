@@ -63,7 +63,7 @@ const changedShare = (before, after) =>
 
 // The sitemap page lists every page (verify-dist enforces that), so it is the page list.
 const lister = await browser.newPage();
-await lister.goto(`${base}/sitemap/`);
+await lister.goto(`${base}/sitemap`);
 const paths = await lister.locator('main a').evaluateAll((links) => links.map((link) => link.getAttribute('href')));
 await lister.close();
 paths.push('/audit-no-such-page'); // the 404 page
@@ -161,7 +161,7 @@ for (const { label, ...mode } of MODES) {
         shown: Boolean(select?.checkVisibility()),
       };
     }, THEME_KEY);
-  await page.goto(`${base}/terms/`, { waitUntil: 'networkidle' });
+  await page.goto(`${base}/terms`, { waitUntil: 'networkidle' });
   const first = await look();
   check(
     'the Theme select is shown, starts on System and leaves the scheme to the system',
