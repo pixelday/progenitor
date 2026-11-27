@@ -20,6 +20,14 @@ On every account that will own the repo, push to it or merge in it:
 | Keep my email addresses private | Off | On | Settings, Emails | DOCS |
 | Block command line pushes that expose my email | Off | On | Settings, Emails | DOCS |
 
+- **Recovery first, then two-factor** (LIVE). Confirm the account's recovery email and phone
+  are current before turning it on: two-factor on a broken recovery path can lock the owner
+  out. Then check from a private window that sign-in asks for the second factor, and test one
+  recovery end to end from a logged-out browser. The same holds for the Cloudflare account
+  (step 3), and most of all for the mailbox that receives both accounts' password resets.
+- Keep the authenticator's seed out of the vault that holds the password: whoever opens that
+  vault then holds both factors. Recovery codes bypass the second factor, so the same goes
+  for them (LIVE).
 - Store the recovery codes offline, not inside the account they recover.
 - Note the account's `noreply` address from the Emails page. It looks like
   `<id>+<login>@users.noreply.github.com`.

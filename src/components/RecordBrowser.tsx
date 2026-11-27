@@ -12,7 +12,7 @@ type Props = {
   categories: string[];
 };
 
-const focusRing = { outline: '2px solid', outlineColor: 'blue.600', outlineOffset: '2px' };
+const focusRing = { outline: '2px solid', outlineColor: 'focusRing', outlineOffset: '2px' };
 
 /**
  * The page's one island: search and category filters over a list that is already in the HTML.
@@ -36,8 +36,8 @@ export default function RecordBrowser({ records, categories }: Props) {
     // The site's CSP has no nonce to give, so Base UI must not inject <style> elements.
     <CSPProvider disableStyleElements>
       <div className={css({ display: 'grid', gap: '4' })}>
-        {/* <search> is the landmark for a set of filter controls. */}
-        <search className={css({ display: 'flex', flexWrap: 'wrap', gap: '3', alignItems: 'center' })}>
+        {/* <search> is the landmark for a set of filter controls. On paper they do nothing. */}
+        <search className={css({ display: 'flex', flexWrap: 'wrap', gap: '3', alignItems: 'center', _print: { display: 'none' } })}>
           <Input
             type="search"
             aria-label="Search records"
@@ -49,7 +49,7 @@ export default function RecordBrowser({ records, categories }: Props) {
               px: '3',
               py: '2',
               borderWidth: '1px',
-              borderColor: 'gray.500',
+              borderColor: 'border.control',
               rounded: 'md',
               _focusVisible: focusRing,
             })}
@@ -70,12 +70,19 @@ export default function RecordBrowser({ records, categories }: Props) {
                   px: '3',
                   py: '1.5',
                   borderWidth: '1px',
-                  borderColor: 'gray.500',
+                  borderColor: 'border.control',
                   rounded: 'full',
                   fontSize: 'sm',
                   cursor: 'pointer',
                   // Base UI sets data-pressed; Panda's _pressed condition matches it.
-                  _pressed: { bg: 'gray.900', color: 'white', borderColor: 'gray.900' },
+                  _pressed: {
+                    bg: 'bg.inverse',
+                    color: 'fg.inverse',
+                    borderColor: 'bg.inverse',
+                    // Forced colors (Windows High Contrast) replace the fill, so the pressed
+                    // state would vanish. The system's own highlight colors keep it visible.
+                    _highContrast: { forcedColorAdjust: 'none', bg: 'Highlight', color: 'HighlightText', borderColor: 'Highlight' },
+                  },
                   _focusVisible: focusRing,
                 })}
               >
@@ -103,7 +110,7 @@ export default function RecordBrowser({ records, categories }: Props) {
           </button>
         </search>
 
-        <p aria-live="polite" className={css({ fontSize: 'sm', color: 'gray.600' })}>
+        <p aria-live="polite" className={css({ fontSize: 'sm', color: 'fg.muted' })}>
           {visible.length} of {records.length} shown
         </p>
 
@@ -113,7 +120,7 @@ export default function RecordBrowser({ records, categories }: Props) {
           {visible.map((record) => (
             <li
               key={record.id}
-              className={css({ borderWidth: '1px', borderColor: 'gray.200', rounded: 'lg', p: '4' })}
+              className={css({ borderWidth: '1px', borderColor: 'border.subtle', rounded: 'lg', p: '4' })}
             >
               <a
                 href={recordHref(record.id)}
@@ -121,7 +128,7 @@ export default function RecordBrowser({ records, categories }: Props) {
               >
                 {record.name}
               </a>
-              <p className={css({ fontSize: 'sm', color: 'gray.600', mt: '1' })}>
+              <p className={css({ fontSize: 'sm', color: 'fg.muted', mt: '1' })}>
                 {record.category} · As of {record.updated}
               </p>
               <p className={css({ mt: '2' })}>{record.summary}</p>

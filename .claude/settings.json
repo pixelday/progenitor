@@ -1,4 +1,5 @@
 {
+  "claudeMdExcludes": ["**/untracked/**", "**/node_modules/**"],
   "permissions": {
     "deny": [
       "Bash(git push:*)",

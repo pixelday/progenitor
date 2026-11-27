@@ -1,0 +1,14 @@
+---
+// Inlines src/scripts/theme.js, the light, dark or system choice. It is inline so that it runs
+// before the page paints: a module script runs after it, and the page would flash the wrong
+// scheme. Astro does not evaluate {expressions} inside <script>, so the text goes in with
+// set:html. verify-dist allows set:html here and in JsonLd.astro only, and allows this script,
+// byte for byte, on pages that otherwise ship no JavaScript.
+import { createHash } from 'node:crypto';
+import code from '../scripts/theme.js?raw';
+
+// Astro hashes the scripts it bundles, not an inline one, so the hash goes into the policy here.
+Astro.csp?.insertScriptHash(`sha256-${createHash('sha256').update(code).digest('base64')}`);
+---
+
+<script is:inline set:html={code} />

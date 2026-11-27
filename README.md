@@ -12,6 +12,8 @@ Start here. Everything a new session needs is in this file, `docs/index.md` and
 `docs/setup/`. `docs/stack-wiring.md` explains the config. `docs/archive/` is background from
 before the starter had code: where it disagrees with the files above, they win.
 
+## [Live Demo](https://progenitor.pixelday.workers.dev/)
+
 ## Prerequisites (as of 2026-11-25)
 
 For the spike:
@@ -90,6 +92,7 @@ Each claim in `docs/setup/` carries one of these tags.
 | `npm run preview` | Serves `dist/` the way Cloudflare will, with the headers and the real 404. Build first. |
 | `npm run audit` | Browser checks against the preview: axe on every page, then the island's behavior. Needs Chrome, so it is not part of the build. Run it before a pull request. |
 | `npm test` | Unit tests only. |
+| `npm run tamper` | Tests the checker: breaks a build on purpose, one way per case, and confirms `verify-dist` fails each time. Run it after any change to `scripts/verify-dist.mjs`. |
 
 There is no `deploy` script on purpose. Deploys come only from Cloudflare building a merge to
 `main`.
@@ -111,13 +114,15 @@ src/content.config.ts   the records' schema; bad data fails the build
 src/pages/              one file per page; records/[id].astro makes a page per record;
                         the .ts files write robots.txt, sitemap.xml, llms.txt and the manifest
 src/layouts/Base.astro  the one <head>: icons, share card, structured data, canonical
-src/components/         React islands (the only JavaScript the site ships), JSON-LD, prose
+src/components/         React islands, JSON-LD, prose, and the component that inlines the theme script
+src/scripts/theme.js    the light, dark or system choice: the one script on every page
 src/lib/                the data projection and the localStorage store, with their tests
 public/                 _headers (security headers, cache rules), the icons, the share card
 astro.config.ts         static output, the Content Security Policy, Panda
 wrangler.jsonc          the Cloudflare Worker: static assets only, no code
 .htmlvalidate.mjs       markup rules for the built HTML
 scripts/verify-dist.mjs checks the build; runs inside `npm run build`
+scripts/tamper-test.mjs checks verify-dist by breaking builds on purpose; `npm run tamper`
 scripts/audit.mjs       checks a served build in a browser; `npm run audit`
 scripts/verify-live.sh  checks a deployed host; run it after every deploy
 ```
@@ -128,7 +133,7 @@ The build fails if any of it is missing, malformed or out of step.
 
 | What | Where it comes from |
 |---|---|
-| `/`, a page per record, `/privacy-policy/`, `/terms/`, `/accessibility/`, `/sitemap/`, a real 404 | `src/pages/` |
+| `/`, a page per record, `/privacy-policy`, `/terms`, `/accessibility`, `/sitemap`, a real 404 | `src/pages/` |
 | `robots.txt`, `manifest.webmanifest` | `src/pages/*.ts`, from `src/site.ts` |
 | `sitemap.xml`, `llms.txt` | the same, on a launched site only |
 | `favicon.ico`, `favicon.svg`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `social.png` | `public/`. The starter's are a plain blue square and card: a site replaces all six |
@@ -178,8 +183,9 @@ The rules above hold for every site. These hold for the starter.
    afterwards would start broken.
 2. **Brandless, not styleless.** The starter is styled and carries no brand: the name is
    "Site name", the address is `example.com` and the icons are a plain blue square. A site
-   should take on a brand by changing design tokens, not by editing components. The token
-   layer that would make that true is not built (`docs/working.md`).
+   takes on a brand by changing the semantic color tokens in `panda.config.ts`, not by editing
+   components. `src/lib/tokens.test.ts` fails the build if a component names a palette color
+   such as `gray.900` instead of a token.
 3. **The real checks from the first build.** A fresh copy passes `npm run build`, which is the
    only build script and the one the deploy is set to run. There is no relaxed script for a
    site that is just starting. The checks that apply only to a launched site turn on with

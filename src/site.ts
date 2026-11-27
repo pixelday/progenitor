@@ -13,8 +13,12 @@ type Site = {
   /** Language of the content: a BCP 47 tag for <html lang>, and its Open Graph form. */
   lang: string;
   locale: string;
-  /** The browser's toolbar color. Keep it equal to the page background. */
-  themeColor: string;
+  /**
+   * The browser's toolbar color in each color scheme, as hex. Keep each equal to the page
+   * background, the `bg` token in panda.config.ts: src/lib/contrast.test.ts checks it. The
+   * web manifest takes one color, the light one.
+   */
+  themeColor: { light: string; dark: string };
   /**
    * The share card: a 1200x630 PNG in public/. The alt text says what the image shows.
    * Previews are cached by every platform: to change the card, add the new file under a new
@@ -52,11 +56,11 @@ export const site: Site = {
   url: 'https://example.com',
   lang: 'en',
   locale: 'en_US',
-  themeColor: '#ffffff',
+  themeColor: { light: '#ffffff', dark: '#030712' },
   shareImage: { path: '/social.png', alt: 'Describe the share image here.' },
   publisher: null,
   contact: null,
-  legalUpdated: '2026-11-25',
+  legalUpdated: '2026-11-26',
   launched: false,
   aiCrawlers: 'allow',
 };

@@ -13,7 +13,8 @@
     "test": "vitest run --dir src",
     "build": "astro check && vitest run --dir src && astro build && html-validate dist && node scripts/verify-dist.mjs",
     "preview": "wrangler dev",
-    "audit": "node scripts/audit.mjs"
+    "audit": "node scripts/audit.mjs",
+    "tamper": "node scripts/tamper-test.mjs"
   },
   "dependencies": {
     "@astrojs/react": "7.1.9",

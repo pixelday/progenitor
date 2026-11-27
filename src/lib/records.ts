@@ -28,5 +28,5 @@ export function toSummary({ id, data }: CollectionEntry<'records'>): RecordSumma
   };
 }
 
-/** Trailing slash on purpose: it is the form the host serves without a redirect. */
-export const recordHref = (id: string) => `/records/${id}/`;
+/** No trailing slash on purpose: it is the form the host serves without a redirect. */
+export const recordHref = (id: string) => `/records/${id}`;

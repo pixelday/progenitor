@@ -1,4 +1,6 @@
 {
+  // Lets an editor check this file against the installed Wrangler's own schema.
+  "$schema": "./node_modules/wrangler/config-schema.json",
   // Must equal the Worker's name in the Cloudflare dashboard. It appears in the public
   // workers.dev hostname, so treat it as permanent.
   "name": "progenitor",
@@ -6,6 +8,10 @@
   // No "main": an assets-only Worker has no code. Its absence keeps the site static.
   "assets": {
     "directory": "./dist",
+    // The default, stated because the URLs depend on it: terms.html is served at /terms and
+    // a folder's index.html at /folder/, and the other spelling of each gets a 307. Astro's
+    // build.format 'preserve' (astro.config.ts) writes files in that shape.
+    "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   },
   // The platform hostname. On until a domain is attached (docs/setup/4-launch.md).

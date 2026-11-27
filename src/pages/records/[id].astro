@@ -19,7 +19,7 @@ const link = css({ textDecoration: 'underline', _hover: { textDecoration: 'none'
 <Base title={data.name} description={data.summary}>
   <a href="/" class={css({ fontSize: 'sm' })}>&larr; All records</a>
   <h1 class={css({ fontSize: '3xl', fontWeight: 'bold' })}>{data.name}</h1>
-  <p class={css({ color: 'gray.600' })}>
+  <p class={css({ color: 'fg.muted' })}>
     {data.category} &middot; As of <time datetime={updated}>{updated}</time>
   </p>
   <p>{data.summary}</p>
@@ -27,7 +27,7 @@ const link = css({ textDecoration: 'underline', _hover: { textDecoration: 'none'
     data.tags.length > 0 && (
       <ul class={css({ display: 'flex', flexWrap: 'wrap', gap: '2' })}>
         {data.tags.map((tag) => (
-          <li class={css({ px: '2', py: '0.5', bg: 'gray.100', rounded: 'sm', fontSize: 'sm' })}>{tag}</li>
+          <li class={css({ px: '2', py: '0.5', bg: 'bg.subtle', rounded: 'sm', fontSize: 'sm' })}>{tag}</li>
         ))}
       </ul>
     )

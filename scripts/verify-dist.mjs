@@ -17,10 +17,10 @@ const SHARE_IMAGE = readFileSync('src/site.ts', 'utf8').match(/shareImage:\s*\{\
 const REQUIRED = [
   'index.html',
   '404.html',
-  'privacy-policy/index.html',
-  'terms/index.html',
-  'accessibility/index.html',
-  'sitemap/index.html',
+  'privacy-policy.html',
+  'terms.html',
+  'accessibility.html',
+  'sitemap.html',
   '_headers',
   'robots.txt',
   'manifest.webmanifest',
@@ -49,16 +49,33 @@ const STARTER_ASSETS = {
 // The starter's share image alt text. A launched site must have written its own.
 const STARTER_ALT = 'Describe the share image here.';
 
-// Pages allowed to load JavaScript. Every other page must ship none.
+// Pages allowed to load JavaScript. Every other page must ship none, except the theme script:
+// the light, dark or system choice, inlined into every page's <head>. It is allowed only as
+// <script> plus the exact text of this file plus </script>; any other script still fails.
 const PAGES_WITH_JS = ['index.html'];
+const THEME_SCRIPT = 'src/scripts/theme.js';
+const themeScript = existsSync(THEME_SCRIPT) ? readFileSync(THEME_SCRIPT, 'utf8') : null;
 
 // Gzipped size of all JS in dist/_astro. Measured at 83.4 KB on 2026-11-25: React is about
 // 67 KB of it, the island with Base UI's Input and ToggleGroup about 16 KB. Every island
 // lives on one page today; move to per-page budgets when that changes.
 const JS_BUDGET_KB = 90;
 
-// The one file allowed to render a raw string (structured data, with "<" escaped).
-const SET_HTML_ALLOWED = ['src/components/JsonLd.astro'];
+// Gzipped size of all CSS in dist/_astro, and of the largest single page. Measured at 6.8 KB
+// and 4.3 KB (index.html) on 2026-11-26. The home page holds every record twice, as HTML and
+// as the island's props, so it grows fastest with the data. Past its budget, split the list
+// into pages.
+const CSS_BUDGET_KB = 15;
+const PAGE_BUDGET_KB = 50;
+
+// Workers Static Assets on the free plan takes at most 20,000 files per version and 25 MiB
+// per file. A build past either would pass every other check and fail at the deploy.
+const MAX_FILES = 20000;
+const MAX_FILE_MIB = 25;
+
+// The files allowed to render a raw string: structured data, with "<" escaped, and the theme
+// script, which inlines a source file and never data.
+const SET_HTML_ALLOWED = ['src/components/JsonLd.astro', 'src/components/ThemeScript.astro'];
 
 const walk = (dir) =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
@@ -107,8 +124,9 @@ const hasNoindex = (html) => meta(html, 'robots').some((content) => /noindex/i.t
 const canonicalOf = (html) => linkHref(html, 'canonical')[0];
 const jsonLdBlocks = (html) =>
   [...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
-// The path a built page is served at: index.html -> /, terms/index.html -> /terms/.
-const servedPath = (name) => `/${name.replace(/index\.html$/, '')}`;
+// The path a built page is served at: index.html -> /, terms.html -> /terms,
+// records/x.html -> /records/x, and a folder's index, a/index.html -> /a/.
+const servedPath = (name) => `/${name.replace(/index\.html$/, '').replace(/\.html$/, '')}`;
 
 // 1. Required files.
 check(
@@ -154,9 +172,17 @@ check(
 );
 
 // 4. The floor every page stands on: language, charset first, a zoomable viewport, a unique
-//    title, a description, the icon links, the manifest link and exactly one <h1>.
+//    title, a description, a theme color, the icon links, the manifest link and exactly one
+//    <h1>. The theme color is one <meta>, or one for each color scheme.
 const titles = new Map();
 for (const { name, html } of pages) titles.set(titleOf(html), [...(titles.get(titleOf(html)) ?? []), name]);
+const THEME_COLOR_PAIR = ['(prefers-color-scheme: dark)', '(prefers-color-scheme: light)'];
+const themeColorOk = (html) => {
+  const metas = tags(html, 'meta').filter((tag) => attr(tag, 'name') === 'theme-color');
+  const media = metas.map((tag) => attr(tag, 'media') ?? '').sort();
+  if (metas.some((tag) => (attr(tag, 'content') ?? '').trim() === '')) return false;
+  return (media.length === 1 && media[0] === '') || media.join() === THEME_COLOR_PAIR.join();
+};
 check(
   'every page has lang, charset, viewport, a unique title, a description, icons and one <h1>',
   pages.flatMap(({ name, html }) => {
@@ -171,7 +197,7 @@ check(
       ...(titleOf(html).trim() === '' ? [`${name}: empty <title>`] : []),
       ...(sameTitle.length > 1 ? [`${name}: shares its <title> with ${sameTitle.filter((other) => other !== name).join(', ')}`] : []),
       ...((meta(html, 'description')[0] ?? '').trim() === '' ? [`${name}: no meta description`] : []),
-      ...(meta(html, 'theme-color').length === 1 ? [] : [`${name}: no theme-color`]),
+      ...(themeColorOk(html) ? [] : [`${name}: needs one theme-color, or one for each of ${THEME_COLOR_PAIR.join(' and ')}`]),
       ...(icons.includes('/favicon.ico') && icons.includes('/favicon.svg') ? [] : [`${name}: missing an icon link`]),
       ...(linkHref(html, 'apple-touch-icon').length === 1 ? [] : [`${name}: no apple-touch-icon link`]),
       ...(linkHref(html, 'manifest').length === 1 ? [] : [`${name}: no manifest link`]),
@@ -283,7 +309,7 @@ check(`the launch switch is applied everywhere (this build is ${launched ? 'LAUN
 
 // 8. The sitemap page links every built page except the 404, so a page cannot be added
 //    without entering the registry (src/lib/pages.ts) that sitemap.xml and llms.txt read.
-const sitemapPageLinks = new Set(tags(text('sitemap/index.html'), 'a').map((tag) => attr(tag, 'href')));
+const sitemapPageLinks = new Set(tags(text('sitemap.html'), 'a').map((tag) => attr(tag, 'href')));
 check(
   'the sitemap page lists every page',
   pages
@@ -313,12 +339,16 @@ const blocksAll = robots
   .some((group) => /^user-agent:\s*\*\s*$/im.test(group) && /^disallow:\s*\/\s*$/im.test(group));
 check('robots.txt never blocks everything', blocksAll ? ['"Disallow: /" applies to every crawler'] : []);
 
-// 11. JavaScript: only the listed pages load any, and the total stays inside the budget.
-//     A structured-data block is data, not script.
-const loadsJs = (html) =>
-  /<script[\s>]|<astro-island[\s>]/i.test(html.replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, ''));
+// 11. Weight: only the listed pages load JavaScript, and the JavaScript, the CSS and the
+//     largest page each stay inside a budget. A structured-data block is data, not script,
+//     and the theme script is allowed everywhere, byte for byte.
+const withoutAllowedScripts = (html) => {
+  const rest = html.replace(/<script[^>]*type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/gi, '');
+  return themeScript === null ? rest : rest.replaceAll(`<script>${themeScript}</script>`, '');
+};
+const loadsJs = (html) => /<script[\s>]|<astro-island[\s>]/i.test(withoutAllowedScripts(html));
 check(
-  `only ${PAGES_WITH_JS.join(', ')} loads JavaScript`,
+  `only ${PAGES_WITH_JS.join(', ')} loads JavaScript, beyond ${THEME_SCRIPT}`,
   pages.filter(({ name, html }) => !PAGES_WITH_JS.includes(name) && loadsJs(html)).map(({ name }) => name),
 );
 const jsKB =
@@ -326,9 +356,22 @@ const jsKB =
     .filter((path) => rel(path).startsWith('_astro/') && path.endsWith('.js'))
     .reduce((total, path) => total + gzipSync(readFileSync(path), { level: 9 }).length, 0) / 1024;
 check(`JS is ${jsKB.toFixed(1)} KB gzipped (budget ${JS_BUDGET_KB} KB)`, jsKB <= JS_BUDGET_KB ? [] : ['over budget']);
+const cssKB =
+  files
+    .filter((path) => rel(path).startsWith('_astro/') && path.endsWith('.css'))
+    .reduce((total, path) => total + gzipSync(readFileSync(path), { level: 9 }).length, 0) / 1024;
+check(`CSS is ${cssKB.toFixed(1)} KB gzipped (budget ${CSS_BUDGET_KB} KB)`, cssKB <= CSS_BUDGET_KB ? [] : ['over budget']);
+const [largest = { name: 'none', kb: 0 }] = pages
+  .map(({ name, html }) => ({ name, kb: gzipSync(html, { level: 9 }).length / 1024 }))
+  .sort((a, b) => b.kb - a.kb);
+check(
+  `the largest page, ${largest.name}, is ${largest.kb.toFixed(1)} KB gzipped (budget ${PAGE_BUDGET_KB} KB)`,
+  largest.kb <= PAGE_BUDGET_KB ? [] : ['over budget: split the record list into pages'],
+);
 
 // 12. Internal links, assets and #fragments point at something that exists. Links to pages use
-//     the trailing-slash form, which the host serves without a redirect.
+//     the form the host serves without a redirect: /terms for terms.html, and a trailing slash
+//     only for a folder's index.html.
 const idsOf = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]));
 const pageByName = new Map(pages.map((page) => [page.name, page]));
 const linkProblems = [];
@@ -344,9 +387,17 @@ for (const { name, html } of pages) {
         linkProblems.push(`${name}: relative link "${url}" (use a root-relative path)`);
         continue;
       }
-      target = path.endsWith('/') ? `${path.slice(1)}index.html` : path.slice(1);
+      const file = path.slice(1);
+      if (path.endsWith('.html')) {
+        linkProblems.push(`${name}: "${url}" names the .html file (link the page without it)`);
+        continue;
+      }
+      if (path.endsWith('/')) target = `${file}index.html`;
+      else target = inDist(`${file}.html`) ? `${file}.html` : file;
       if (!inDist(target)) {
-        linkProblems.push(`${name}: "${url}" does not exist in ${DIST}/ (page links end with a slash)`);
+        linkProblems.push(
+          `${name}: "${url}" does not exist in ${DIST}/ (a page link has no trailing slash; only a folder index ends in one)`,
+        );
         continue;
       }
     }
@@ -363,13 +414,70 @@ check(
   pages.filter(({ html }) => /localhost|\bTODO\b/.test(html)).map(({ name }) => name),
 );
 
-// 14. Data never renders as raw HTML. The structured-data component is the one exception.
+// 14. Data never renders as raw HTML. The structured-data component is one exception, and
+//     the component that inlines the theme script the other.
 check(
   `src/ uses set:html only in ${SET_HTML_ALLOWED.join(', ')}`,
   walk('src')
     .map((path) => path.split(sep).join('/'))
     .filter((path) => /\.(astro|tsx?|jsx?|mdx?)$/.test(path) && !SET_HTML_ALLOWED.includes(path))
     .filter((path) => /set:html|dangerouslySetInnerHTML/.test(readFileSync(path, 'utf8'))),
+);
+
+// 15. The host's limits on what one deploy may upload. Wrangler's "Read N files" line counts
+//     folders too, so it prints a larger number than this check. Its upload list does not.
+check(
+  `${files.length} files (limit ${MAX_FILES}), none over ${MAX_FILE_MIB} MiB`,
+  [
+    ...(files.length > MAX_FILES ? [`${files.length} files is over the limit of ${MAX_FILES}`] : []),
+    ...files
+      .filter((path) => statSync(path).size > MAX_FILE_MIB * 1024 * 1024)
+      .map((path) => `${rel(path)} is ${(statSync(path).size / 1024 / 1024).toFixed(1)} MiB`),
+  ],
+);
+
+// 16. One YAML file drives two outputs: a static page per record, and the island's props,
+//     which Astro writes into the home page's HTML. The props must hold every record that
+//     has a page, and only the fields of RecordSummary in src/lib/records.ts: anything more
+//     is published in the page source without anyone choosing to.
+const SUMMARY_SOURCE = 'src/lib/records.ts';
+const summaryFields = (existsSync(SUMMARY_SOURCE) ? readFileSync(SUMMARY_SOURCE, 'utf8') : '')
+  .match(/export type RecordSummary = \{([\s\S]*?)\n\};/)?.[1]
+  .match(/^\s+\w+\??:/gm)
+  ?.map((line) => line.trim().replace(/\??:$/, ''));
+// Astro serializes island props as [type, value] pairs: 0 a plain value or object, 1 an array.
+const revive = ([type, value]) =>
+  type === 1
+    ? value.map(revive)
+    : type === 0 && value && typeof value === 'object'
+      ? Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, revive(inner)]))
+      : value;
+const unescape = (value) => value.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+const islandRecords = pages.flatMap(({ name, html }) =>
+  tags(html, 'astro-island').flatMap((tag) => {
+    const props = attr(tag, 'props');
+    if (!props) return [];
+    const records = revive([0, JSON.parse(unescape(props))]).records;
+    return Array.isArray(records) ? [{ name, records }] : [];
+  }),
+);
+const recordPages = pages.map(({ name }) => name.match(/^records\/([^/]+)\.html$/)?.[1]).filter(Boolean);
+check(
+  `the island's props hold every record and only the fields of RecordSummary`,
+  summaryFields === undefined
+    ? [`cannot read the RecordSummary type from ${SUMMARY_SOURCE}`]
+    : islandRecords.flatMap(({ name, records }) => {
+        const ids = records.map((record) => record.id);
+        return [
+          ...records.flatMap((record) =>
+            Object.keys(record)
+              .filter((key) => !summaryFields.includes(key))
+              .map((key) => `${name}: record "${record.id}" carries "${key}", which RecordSummary does not have`),
+          ),
+          ...recordPages.filter((id) => !ids.includes(id)).map((id) => `${name}: /records/${id} is built, but its record is not in the props`),
+          ...ids.filter((id) => !recordPages.includes(id)).map((id) => `${name}: "${id}" is in the props, but /records/${id} is not built`),
+        ];
+      }),
 );
 
 console.log(failed ? '\nverify-dist: FAILED' : `\nverify-dist: ${pages.length} pages checked, all passed`);

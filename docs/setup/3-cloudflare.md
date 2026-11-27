@@ -18,9 +18,21 @@ dashboard parts; a session verifies.
 | Members | Only people who need the dashboard. On the Free plan the one role an added member can hold is Administrator, which reaches DNS, the registrar and member management. | LIVE |
 | API tokens | None before the repo is connected. Exactly one afterwards: see below. | DOCS |
 
+- Recovery comes before two-factor, as in step 2, part 1.
+- **One login is a single point of failure** (LIVE): undoing a bad deploy is a dashboard
+  click (part 7). With more than one principal, give two of them their own logins. With a
+  single owner, keep the recovery codes offline and test one recovery once.
+- **Check for a circular dependency** (LIVE). If the Cloudflare login is a mailbox on this
+  domain, and the domain's mail records live in this zone, resetting the Cloudflare password
+  depends on Cloudflare DNS working. Offline recovery codes, or a second member, break the
+  loop.
 - Connecting a repo makes Cloudflare generate **one API token** for its builds. It is a user
   token, listed under the connecting user's My Profile, API Tokens. Do not delete or roll it:
   builds then fail with "The build token selected for this build has been deleted or rolled".
+  If that happens, create a new token and select it in the build settings (DOCS).
+- **Every user also has a Global API Key** (DOCS). It can't be deleted, only viewed or rolled,
+  and it carries the user's full permissions. Nothing here uses it. If it has ever been
+  copied anywhere, roll it: My Profile, API Tokens, API Keys (LIVE).
 - **The token is not scoped to this Worker** (DEPLOYED: the create screen lists its
   permissions before making it). It can edit Workers scripts and the account's Workers
   storage products, such as KV, R2, D1 and Queues. It can edit Workers Routes on every zone
@@ -37,6 +49,7 @@ In `wrangler.jsonc`, set `name` and `compatibility_date` (step 1). The file as s
 
 | Key | Value | Why |
 |---|---|---|
+| `$schema` | `./node_modules/wrangler/config-schema.json` | Lets an editor check the file against the installed Wrangler. |
 | `name` | the Worker's name | Must equal the name given in the dashboard, or the build fails. It appears in the public hostname, so keep it neutral. |
 | `main` | absent | An assets-only Worker has no code. Its absence is what keeps the site static. |
 | `assets.directory` | `./dist` | Astro's output. |
@@ -120,7 +133,7 @@ from the starter's production build of 2026-11-26 (DEPLOYED).
 2. **The install used the lockfile:** `Installing project dependencies: npm clean-install
    --progress=false`. `panda codegen` ran after it (the `prepare` script) and wrote
    `styled-system`. Without it, `astro check` fails on every `styled-system/...` import.
-3. **`npm run build` printed fifteen `PASS` lines**, then `verify-dist: 12 pages checked, all
+3. **`npm run build` printed eighteen `PASS` lines**, then `verify-dist: 12 pages checked, all
    passed`.
 4. **The deploy step uploaded the assets** and printed the hostname. It lists only new or
    modified assets, so a file that did not change is not on the list. Every HTML page is on
@@ -146,10 +159,14 @@ Every line must say `PASS`. In `preview` mode it checks:
 - the six security headers arrive on the page and on the 404
 - both halves of the CSP arrive: the header and the `<meta>`
 - no `Set-Cookie`, and nothing injected at the edge
+- HTML is `max-age=0, must-revalidate`, and a file under `/_astro/` is `immutable`
 - `robots.txt` answers 200 and does not block everything
 - the icons and the manifest answer 200 with the right type, and the privacy policy, terms,
   accessibility and sitemap pages answer 200
 - the host sends `X-Robots-Tag: noindex`
+
+The two cache lines were added later on 2026-11-26. With them the script printed 38 `PASS`
+lines against the production hostname (DEPLOYED).
 
 The script is copied from `docs/archive/technical-brief.md`, where it was run against public
 hosts. On 2026-11-26, after a merge to `main` had built and deployed, it printed 36 `PASS`
@@ -223,7 +240,11 @@ request whose preview did have an address got no comment.
 - **A push that starts no build sends no alert either.** The previous version keeps serving
   and the commit has no status check at all (DEPLOYED: part 3).
 - **Previews are public** to anyone with the URL. They send `noindex`, but they are not
-  private. Do not put uncleared content on a branch.
+  private. Do not put uncleared content on a branch. To make them private: the Worker's
+  Access tab, Protect this Worker behind Access, Previews only, with the one-time PIN login
+  and an email allowlist (DOCS). Test the PIN once: it is single-use, expires in ten minutes,
+  and a mail scanner can use it up before the person clicks. `verify-live.sh` can't reach a
+  protected preview.
 - **A preview goes away with its branch** (DEPLOYED). Within a minute of the pull request's
   merge, which deleted the branch, its preview hostname answered Cloudflare's plain "Page not
   found". Check a preview before merging, not after.
