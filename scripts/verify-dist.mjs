@@ -166,9 +166,17 @@ check(
 );
 
 // 4. The floor every page stands on: language, charset first, a zoomable viewport, a unique
-//    title, a description, the icon links, the manifest link and exactly one <h1>.
+//    title, a description, a theme color, the icon links, the manifest link and exactly one
+//    <h1>. The theme color is one <meta>, or one for each color scheme.
 const titles = new Map();
 for (const { name, html } of pages) titles.set(titleOf(html), [...(titles.get(titleOf(html)) ?? []), name]);
+const THEME_COLOR_PAIR = ['(prefers-color-scheme: dark)', '(prefers-color-scheme: light)'];
+const themeColorOk = (html) => {
+  const metas = tags(html, 'meta').filter((tag) => attr(tag, 'name') === 'theme-color');
+  const media = metas.map((tag) => attr(tag, 'media') ?? '').sort();
+  if (metas.some((tag) => (attr(tag, 'content') ?? '').trim() === '')) return false;
+  return (media.length === 1 && media[0] === '') || media.join() === THEME_COLOR_PAIR.join();
+};
 check(
   'every page has lang, charset, viewport, a unique title, a description, icons and one <h1>',
   pages.flatMap(({ name, html }) => {
@@ -183,7 +191,7 @@ check(
       ...(titleOf(html).trim() === '' ? [`${name}: empty <title>`] : []),
       ...(sameTitle.length > 1 ? [`${name}: shares its <title> with ${sameTitle.filter((other) => other !== name).join(', ')}`] : []),
       ...((meta(html, 'description')[0] ?? '').trim() === '' ? [`${name}: no meta description`] : []),
-      ...(meta(html, 'theme-color').length === 1 ? [] : [`${name}: no theme-color`]),
+      ...(themeColorOk(html) ? [] : [`${name}: needs one theme-color, or one for each of ${THEME_COLOR_PAIR.join(' and ')}`]),
       ...(icons.includes('/favicon.ico') && icons.includes('/favicon.svg') ? [] : [`${name}: missing an icon link`]),
       ...(linkHref(html, 'apple-touch-icon').length === 1 ? [] : [`${name}: no apple-touch-icon link`]),
       ...(linkHref(html, 'manifest').length === 1 ? [] : [`${name}: no manifest link`]),

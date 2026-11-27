@@ -61,7 +61,7 @@ What `scripts/verify-dist.mjs` refuses to pass:
 | A required file is missing: a page (home, 404, privacy policy, terms, accessibility, sitemap), `_headers`, `robots.txt`, the manifest, an icon or the share card | A missing `_headers` or 404 page fails silently on the host. |
 | A page lacks the CSP `<meta>`, or an inline script, style or structured-data block has no hash in it | The browser would block it and the island would never respond. Nothing visible fails. |
 | A `style=""` attribute or a `data:` URI in built HTML; a `<style>` in `<body>` | The CSP blocks the first two. The third is invalid HTML. |
-| A page lacks `lang`, a zoomable viewport, a description, the icon or manifest links, or exactly one `<h1>`; two pages share a title | The floor every page stands on. |
+| A page lacks `lang`, a zoomable viewport, a description, a theme color (one, or one each for light and dark), the icon or manifest links, or exactly one `<h1>`; two pages share a title | The floor every page stands on. |
 | `favicon.ico` is not an ICO or holds no 32x32 image, an icon or the share image has the wrong pixel size, or the manifest is not valid JSON | A PNG renamed to `.ico` works only because browsers sniff it. |
 | A page has both `noindex` and a canonical, or neither; the 404 is not `noindex` | Indexability is one switch (`launched` in `src/site.ts`). |
 | The launch switch is half applied: a canonical without a share card, a `sitemap.xml` that does not list exactly the indexable pages, a `Sitemap:` line or an `llms.txt` before launch, an `llms.txt` that contradicts `robots.txt` | One switch, every consumer, or the build fails. |
@@ -79,7 +79,7 @@ alone: it builds two copies of the site in a temporary folder, one as it stands 
 launched with test values, then breaks a copy of one of them for each case and runs
 `verify-dist` there. A case passes when exactly the checks it should trip print `FAIL`.
 Expect two controls, one coverage line and a `PASS` line for each case, ending with
-`tamper-test: 79 breaks, every one caught`.
+`tamper-test: 82 breaks, every one caught`.
 
 - A check added to `verify-dist` without a case fails the run, and so does a check that stops
   catching its case. A change to `verify-dist` therefore comes with its case.

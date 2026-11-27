@@ -121,7 +121,27 @@ const cases = [
   { name: 'an empty <title>', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<title>[^<]*<\/title>/, '<title></title>') },
   { name: 'two pages share a title', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<title>[^<]*<\/title>/, read(d, 'privacy-policy/index.html').match(/<title>[^<]*<\/title>/)[0]) },
   { name: 'no meta description', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<meta name="description"[^>]*>/, '') },
-  { name: 'no theme-color', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<meta name="theme-color"[^>]*>/, '') },
+  { name: 'no theme-color', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<meta name="theme-color"[^>]*>/g, '') },
+  { name: 'an empty theme-color', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /(<meta name="theme-color"[^>]*content=")[^"]*"/, '$1"') },
+  {
+    name: 'two theme-colors for the same scheme',
+    base: 'site',
+    fails: ['floor'],
+    tamper: (d) => {
+      edit(d, T, /<meta name="theme-color"[^>]*>/g, '');
+      const light = '<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">';
+      inHead(d, T, light + light);
+    },
+  },
+  {
+    name: 'two theme-colors with no scheme',
+    base: 'site',
+    fails: ['floor'],
+    tamper: (d) => {
+      edit(d, T, /<meta name="theme-color"[^>]*>/g, '');
+      inHead(d, T, '<meta name="theme-color" content="#ffffff"><meta name="theme-color" content="#000000">');
+    },
+  },
   { name: 'no favicon.svg link', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<link rel="icon" href="\/favicon\.svg"[^>]*>/, '') },
   { name: 'no apple-touch-icon link', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<link rel="apple-touch-icon"[^>]*>/, '') },
   { name: 'no manifest link', base: 'site', fails: ['floor'], tamper: (d) => edit(d, T, /<link rel="manifest"[^>]*>/, '') },
