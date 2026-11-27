@@ -426,5 +426,49 @@ check(
   ],
 );
 
+// 16. One YAML file drives two outputs: a static page per record, and the island's props,
+//     which Astro writes into the home page's HTML. The props must hold every record that
+//     has a page, and only the fields of RecordSummary in src/lib/records.ts: anything more
+//     is published in the page source without anyone choosing to.
+const SUMMARY_SOURCE = 'src/lib/records.ts';
+const summaryFields = (existsSync(SUMMARY_SOURCE) ? readFileSync(SUMMARY_SOURCE, 'utf8') : '')
+  .match(/export type RecordSummary = \{([\s\S]*?)\n\};/)?.[1]
+  .match(/^\s+\w+\??:/gm)
+  ?.map((line) => line.trim().replace(/\??:$/, ''));
+// Astro serializes island props as [type, value] pairs: 0 a plain value or object, 1 an array.
+const revive = ([type, value]) =>
+  type === 1
+    ? value.map(revive)
+    : type === 0 && value && typeof value === 'object'
+      ? Object.fromEntries(Object.entries(value).map(([key, inner]) => [key, revive(inner)]))
+      : value;
+const unescape = (value) => value.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+const islandRecords = pages.flatMap(({ name, html }) =>
+  tags(html, 'astro-island').flatMap((tag) => {
+    const props = attr(tag, 'props');
+    if (!props) return [];
+    const records = revive([0, JSON.parse(unescape(props))]).records;
+    return Array.isArray(records) ? [{ name, records }] : [];
+  }),
+);
+const recordPages = pages.map(({ name }) => name.match(/^records\/([^/]+)\/index\.html$/)?.[1]).filter(Boolean);
+check(
+  `the island's props hold every record and only the fields of RecordSummary`,
+  summaryFields === undefined
+    ? [`cannot read the RecordSummary type from ${SUMMARY_SOURCE}`]
+    : islandRecords.flatMap(({ name, records }) => {
+        const ids = records.map((record) => record.id);
+        return [
+          ...records.flatMap((record) =>
+            Object.keys(record)
+              .filter((key) => !summaryFields.includes(key))
+              .map((key) => `${name}: record "${record.id}" carries "${key}", which RecordSummary does not have`),
+          ),
+          ...recordPages.filter((id) => !ids.includes(id)).map((id) => `${name}: /records/${id}/ is built, but its record is not in the props`),
+          ...ids.filter((id) => !recordPages.includes(id)).map((id) => `${name}: "${id}" is in the props, but /records/${id}/ is not built`),
+        ];
+      }),
+);
+
 console.log(failed ? '\nverify-dist: FAILED' : `\nverify-dist: ${pages.length} pages checked, all passed`);
 process.exit(failed ? 1 : 0);

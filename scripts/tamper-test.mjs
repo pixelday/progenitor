@@ -54,6 +54,7 @@ const CHECKS = {
   residue: /^no localhost or TODO/,
   setHtml: /^src\/ uses set:html only/,
   hostLimits: /^\d+ files \(limit/,
+  islandProps: /^the island's props hold every record/,
 };
 // The one check that stops verify-dist before the others run.
 const EARLY_EXIT = ['noDist'];
@@ -274,6 +275,25 @@ const cases = [
     },
   },
 ];
+
+// Island props, as Astro escapes them in the HTML.
+const Q = '&quot;';
+cases.push(
+  // 16. The island's props: every record, and only RecordSummary's fields.
+  {
+    name: 'the island gets a field RecordSummary does not have',
+    base: 'site',
+    fails: ['islandProps'],
+    tamper: (d) => edit(d, 'index.html', `${Q}summary${Q}:[0,`, `${Q}source${Q}:[0,${Q}https://example.com/${Q}],${Q}summary${Q}:[0,`),
+  },
+  {
+    name: 'a record has a page but is not in the props',
+    base: 'site',
+    fails: ['islandProps'],
+    tamper: (d) => edit(d, 'index.html', new RegExp(`${Q}id${Q}:\\[0,${Q}[^&]+${Q}\\]`), `${Q}id${Q}:[0,${Q}renamed${Q}]`),
+  },
+  { name: 'RecordSummary cannot be read', base: 'site', fails: ['islandProps'], tamper: (d) => writeFileSync(join(d, 'src/lib/records.ts'), 'export {};\n') },
+);
 
 // ---------------------------------------------------------------------------------------
 // The two builds every case starts from.

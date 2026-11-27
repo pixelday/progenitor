@@ -46,7 +46,7 @@ node scripts/verify-dist.mjs`. Expect, in order:
 Tests  12 passed (12)                       (vitest)
 [build] 12 page(s) built                    (astro build)
                                             (html-validate prints nothing when it passes)
-PASS  required files exist                  (verify-dist: eighteen PASS lines)
+PASS  required files exist                  (verify-dist: nineteen PASS lines)
 ...
 verify-dist: 12 pages checked, all passed
 ```
@@ -73,13 +73,14 @@ What `scripts/verify-dist.mjs` refuses to pass:
 | More than 20,000 files, or one over 25 MiB | Cloudflare's limits for static assets on the free plan. A build past either passes here and fails at the deploy. |
 | An internal link, asset or `#fragment` points at nothing; a page link lacks its trailing slash | The host answers a slashless page path with a temporary redirect. |
 | `localhost` or `TODO` in built HTML; `set:html` in `src/` outside `src/components/JsonLd.astro` and `src/components/ThemeScript.astro` | Residue, and data rendered as raw HTML. |
+| The island's props, written into the home page, leave out a record that has a page, name one that has none, or carry a field that `RecordSummary` in `src/lib/records.ts` does not list | Props are public in the page source. Only what the list needs goes there, and it must match the pages. |
 
 `npm run tamper` tests each check the other way. It needs no build first and leaves `dist/`
 alone: it builds two copies of the site in a temporary folder, one as it stands and one
 launched with test values, then breaks a copy of one of them for each case and runs
 `verify-dist` there. A case passes when exactly the checks it should trip print `FAIL`.
 Expect two controls, one coverage line and a `PASS` line for each case, ending with
-`tamper-test: 84 breaks, every one caught`.
+`tamper-test: 87 breaks, every one caught`.
 
 - A check added to `verify-dist` without a case fails the run, and so does a check that stops
   catching its case. A change to `verify-dist` therefore comes with its case.
